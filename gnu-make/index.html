@@ -1,0 +1,576 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  
+  <meta charset="UTF-8">
+  <title>
+    GNU Make | System Under Test
+  </title>
+
+
+  
+  <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1,initial-scale=1">
+
+  
+  <link rel="canonical" href="http://systemundertest.org/gnu-make/"/>
+
+  
+  <link rel="stylesheet" href="/css/sanitize.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="/css/highlight_monokai.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/custom.css">
+  
+  
+  <link href="http://systemundertest.org/index.xml" rel="alternate" type="application/rss+xml" title="System Under Test" />
+  <link href="http://systemundertest.org/index.xml" rel="feed" type="application/rss+xml" title="System Under Test" />
+
+  
+  
+
+  
+    <meta name="keywords" content="make,makefile,testing" />
+  
+
+  
+    <meta name="description" content="Overview of GNU Make testing infrastructure" />
+  
+ 
+
+</head>
+
+
+
+<body>
+<div class="container">
+
+  
+  <header role="banner">
+    <div class="row gutters">
+      <div id="site-title" class="col span_6">
+        <h1><a href="http://systemundertest.org/">System Under Test</a></h1>
+        <h2>How Software is Tested</h2>
+      </div>
+      <div id="social" class="col span_6">
+        <ul>
+          <li><a href="https://twitter.com/systemundertest" target="_blank">Twitter</a></li>
+          <li><a href="http://systemundertest.org/index.xml" type="application/rss+xml" target="_blank">RSS</a></li>
+          <li><a href="http://systemundertest.org//about">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+
+  
+  <main id="single" role="main">
+    <div class="article-header">
+      <h1>GNU Make</h1>
+          <div class="meta">
+      Jun 12, 2016 &nbsp;
+      
+        #<a href="/categories/build-tools">Build Tools</a>&nbsp;
+      
+
+    </div>
+    <div class="meta">
+      
+      by @<a href="https://twitter.com/sbpankevich" target="_blank">Stanislav</a>&nbsp;
+      
+    </div>
+
+
+    </div>
+    <article>
+      
+
+<h3 id="introduction">Introduction</h3>
+
+<p><strong>Disclaimer:</strong> the author of this post is not involved into a development of GNU Make project. All of the following is merely a high-level report about what a curious developer can see from looking at the GNU Make&rsquo;s sources. The author didn&rsquo;t go very deep into the topic, could overlook something etc. Having that said, we always appreciate feedback from our colleagues who have advanced experience with the projects we write about, especially from the developers and maintainers.</p>
+
+<h3 id="getting-gnu-make-s-sources">Getting GNU Make&rsquo;s sources</h3>
+
+<p>GNU Make&rsquo;s source code is available from git repository and can be found 2 links away from the Make&rsquo;s main home page: <a href="https://www.gnu.org/software/make/">GNU Make</a>:</p>
+
+<blockquote>
+<p>Development</p>
+
+<p>For development sources, issue trackers, and other information, please see the Make project page at savannah.gnu.org.</p>
+</blockquote>
+
+<p>On <a href="http://savannah.gnu.org/projects/make">Make&rsquo;s Savannah&rsquo;s page</a>:</p>
+
+<blockquote>
+<p><a href="http://savannah.gnu.org/git/?group=make">Git Source Code Manager: Git Repository</a></p>
+</blockquote>
+
+<p>To get Make&rsquo;s sources:</p>
+
+<pre>
+git clone git://git.savannah.gnu.org/make.git GNUMake
+cd make
+</pre>
+
+<h3 id="good-news-make-has-tests">Good news: Make has tests</h3>
+
+<pre>
+$ ls -l tests/
+total 376
+-rw-r--r--   1 Stanislaw  staff  35147 May 27 20:54 COPYING
+-rw-r--r--   1 Stanislaw  staff  48828 May 27 20:54 ChangeLog.1
+-rw-r--r--   1 Stanislaw  staff   6765 May 27 20:54 NEWS
+-rw-r--r--   1 Stanislaw  staff   4677 May 27 20:54 README
+-rw-r--r--   1 Stanislaw  staff    470 May 27 20:54 config-flags.pm.in
+-rwxr-xr-x   1 Stanislaw  staff   1705 May 27 20:54 config_flags_pm.com
+-rw-r--r--   1 Stanislaw  staff    359 May 27 20:54 guile.supp
+-rwxr-xr-x   1 Stanislaw  staff   1424 May 27 20:54 mkshadow
+-rwxr-xr-x   1 Stanislaw  staff     36 May 27 20:54 run_make_tests
+-rwxr-xr-x   1 Stanislaw  staff   8330 May 27 20:54 run_make_tests.com
+-rw-r--r--   1 Stanislaw  staff  14179 May 27 20:54 run_make_tests.pl
+drwxr-xr-x  10 Stanislaw  staff    340 May 27 20:54 scripts
+-rw-r--r--   1 Stanislaw  staff  40197 May 27 20:54 test_driver.pl
+</pre>
+
+<p>The actual tests are located in <code>tests/scripts</code> directory:</p>
+
+<pre>
+$ ls -l tests/scripts
+total 8
+drwxr-xr-x  40 Stanislaw  staff  1360 Jun  2 21:47 features
+drwxr-xr-x  31 Stanislaw  staff  1054 May 27 20:54 functions
+drwxr-xr-x  10 Stanislaw  staff   340 May 27 20:54 misc
+drwxr-xr-x  18 Stanislaw  staff   612 May 29 10:22 options
+drwxr-xr-x  12 Stanislaw  staff   408 Jun 10 20:42 targets
+-rw-r--r--   1 Stanislaw  staff  1015 May 27 20:54 test_template
+drwxr-xr-x  22 Stanislaw  staff   748 May 27 20:54 variables
+drwxr-xr-x   3 Stanislaw  staff   102 May 27 20:54 vms
+</pre>
+
+<p>The following are interesting notes I found before running the tests.</p>
+
+<h4 id="the-oldest-update-in-news-file-dates-back-to-1992">The oldest update in NEWS file dates back to 1992</h4>
+
+<pre>
+Changes from 0.1 to 0.2 (5-4-92):
+
+README corrected to require perl 4.019, not 4.010.
+
+-make_path replaces -old.
+
+errors_in_commands test updated for change in format introduced in
+make 3.62.6.
+
+test_driver_core now uses a better way of figuring what OS it is
+running on (thanks to meyering@cs.utexas.edu (Jim Meyering) for
+suggesting this, as well as discovering the hard way that the old
+way (testing for /mnt) fails on his machine).
+
+Some new tests were added.
+</pre>
+
+<p>This means that <strong>tests in Make were introduced as early as of 1992!</strong> which is a very good sign given some other tools are likely to not have a good coverage even in present days as described in another article of this series: <a href="http://lowlevelbits.org/system-under-test-freebsd">System Under Test: FreeBSD</a> (see Conclusion there).</p>
+
+<h4 id="the-test-suite-requires-perl-and-can-be-run-on-unix-windows-and-dos-systems">The test suite requires Perl and can be run on UNIX, Windows and DOS systems</h4>
+
+<pre>
+To run the test suite on a UNIX system, use "perl ./run_make_tests"
+(or just "./run_make_tests" if you have a perl on your PATH).
+
+To run the test suite on Windows NT or DOS systems, use
+"perl.exe ./run_make-tests.pl".
+</pre>
+
+<h4 id="the-test-suite-is-run-against-make-executable">The test suite is run against Make executable</h4>
+
+<pre>
+By default, the test engine picks up the first executable called "make"
+that it finds in your path.  You may use the -make_path option (i.e.,
+"perl run_make_tests -make_path /usr/local/src/make-3.78/make") if
+you want to run a particular copy.  This now works correctly with
+relative paths and when make is called something other than "make" (like
+"gmake").
+</pre>
+
+<p>This observation leads us to conclusion that these <strong>GNU Make&rsquo;s tests are actually integration tests</strong> - it is the final <code>make</code> executable that is tested, not its parts like they would be with unit testing (depending on terminology this kind of testing of a final product can also be called functional or acceptance testing).</p>
+
+<h4 id="build-artefacts">Build artefacts</h4>
+
+<pre>
+A directory named "work" will be created when the tests are run which
+will contain any makefiles and "diff" files of tests that fail so that
+you may look at them afterward to see the output of make and the
+expected result.
+</pre>
+
+<h3 id="running-tests-against-default-osx-make">Running tests against default OSX Make</h3>
+
+<p>Having read both documents: <code>tests/NEWS</code> and <code>tests/README</code> let&rsquo;s try to run the tests. As we learned earlier, by default the test suite will pick up first <code>make</code> from path so it will default to default make of OSX system which is on my machine:</p>
+
+<pre>
+make -v
+GNU Make 3.81
+Copyright (C) 2006  Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+
+This program built for i386-apple-darwin11.3.0
+</pre>
+
+<p>If you ever wondered why default <code>make</code> on OS X is so old, you are in good company - see <a href="https://www.quora.com/What-is-the-reason-for-some-of-the-Linux-tools-on-OS-X-being-so-old-Is-this-related-to-GPL-licensing">What is the reason for some of the Linux tools on OS X being so old? Is this related to GPL licensing?</a>.</p>
+
+<p>To run tests:</p>
+
+<pre>
+$ cd tests/
+$ # The following has to be done otherwise script will complain with:
+$ # "Can't locate config-flags.pm in @INC..."
+$ cp config-flags.pm.in config-flags.pm
+$ ./run_make_tests
+...
+output with lots of errors and finally:
+212 Tests in 66 Categories Failed (See .diff* files in work dir for details) :-(
+</pre>
+
+<p>We see here that oldness of default Make on OS X does cost 212 failing tests. I assume that the reason why most of these failing tests are failing is not a regression in core functionality of Make but rather because of new features were added to GNU Make since 2006.</p>
+
+<p>To understand how that is different for latest Make let&rsquo;s build it from source and run tests against it.</p>
+
+<h3 id="running-tests-against-latest-make-built-from-source">Running tests against latest Make built from source</h3>
+
+<p>Let&rsquo;s get back from <code>tests</code> directory one level up to the root directory of source tree. Inspired by the instructions in INSTALL and after some additional googling we need to run <code>autoreconf</code> so that it creates proper <code>configure</code> script for us:</p>
+
+<pre>
+$ pwd # /Users/Stanislaw/Projects/GNUMake
+$ brew install automake
+$ # gettext is needed by autoreconf to locate gettext,
+$ # be careful with force linking it on your system.
+$ brew install gettext
+$ brew link gettext --force
+$ autoreconf # creates 'configure' script
+</pre>
+
+<p>Then we want to run this newly created script with <code>--prefix</code> parameter so that it will not install make to the <code>/usr/local/bin</code> directory but rather to <code>./Build</code> directory (to not conflict with OSX&rsquo;s Make which we don&rsquo;t want within the scope of this post).</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>$ ./configure --prefix<span style="color: #666666">=</span><span style="color: #008000; font-weight: bold">$(</span><span style="color: #008000">pwd</span><span style="color: #008000; font-weight: bold">)</span>/Build
+</pre></div>
+
+<p>At this point if you run <code>make</code> the very first time you will likely see errors about some localization files missing:</p>
+
+<pre>
+Making all in doc
+Updating ./version.texi
+make[2]: *** No rule to make target `fdl.texi', needed by `make.info'.  Stop.
+make[1]: *** [all-recursive] Error 1
+make: *** [all] Error 2
+</pre>
+
+<p>To fix that you have to first run (solution found at <a href="http://gnu-make.2324884.n4.nabble.com/NLS-related-failure-when-building-make-from-CVS-tp2157p2158.html">GNU Make forums</a>):</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>make update
+</pre></div>
+
+<p>Everything should work fine since then, finally we run:</p>
+
+<pre>
+$ make && make install
+...
+  /usr/bin/install -c make '/Users/Stanislaw/Projects/Make/GNUMake/Build/bin'
+...
+$ ./Build/bin/make --version
+GNU Make 4.2
+Built for x86_64-apple-darwin15.3.0
+Copyright (C) 1988-2016 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+</pre>
+
+<p>Which is 2006&rsquo;s Make 3.81 that has just been used to build 2016&rsquo;s Make 4.2!</p>
+
+<p>Let&rsquo;s run the tests!</p>
+
+<pre>
+$ cd tests
+$ ./run_make_tests -make ../Build/bin/make
+</pre>
+
+<p>The results are quite pleasant to look at - <strong>GNU Make built from latest source code on Mac OS X machine, passes all of its tests</strong>:</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #666666">581</span> Tests in <span style="color: #666666">118</span> Categories Complete ... No Failures :-<span style="color: #666666">)</span>
+</pre></div>
+
+<h3 id="test-case-template">Test case template</h3>
+
+<p>The file <code>tests/scripts/test_template</code> is a generic template, most of the tests are based on it:</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">#                                                                    -*-perl-*-</span>
+
+<span style="color: #19177C">$description</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;&lt;FILL IN SHORT DESCRIPTION HERE&gt;&quot;</span>;
+<span style="color: #19177C">$details</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;&lt;FILL IN DETAILS OF HOW YOU TEST WHAT YOU SAY YOU ARE TESTING&gt;&quot;</span>;
+
+<span style="color: #408080; font-style: italic"># Run a make test.  See the documentation of run_make_test() in</span>
+<span style="color: #408080; font-style: italic"># run_make_tests.pl, but briefly the first argument is a string with the</span>
+<span style="color: #408080; font-style: italic"># contents of a makefile to be tested, the second is a string containing the</span>
+<span style="color: #408080; font-style: italic"># arguments to be passed to the make invocation, the third is a string</span>
+<span style="color: #408080; font-style: italic"># containing the expected output.  The fourth is the expected exit code for</span>
+<span style="color: #408080; font-style: italic"># make.  If not specified, it&#39;s assumed that the make program should succeed</span>
+<span style="color: #408080; font-style: italic"># (exit with 0).</span>
+
+run_make_test(<span style="color: #BA2121">&#39;Your test makefile goes here&#39;</span>,
+              <span style="color: #BA2121">&#39;Arguments to pass to make go here&#39;</span>,
+              <span style="color: #BA2121">&#39;Expected output from the invocation goes here&#39;</span>);
+
+<span style="color: #408080; font-style: italic"># There are various special tokens, options, etc.  See the full documentation</span>
+<span style="color: #408080; font-style: italic"># in run_make_tests.pl.</span>
+
+
+<span style="color: #408080; font-style: italic"># This tells the test driver that the perl test script executed properly.</span>
+<span style="color: #666666">1</span>;
+</pre></div>
+
+<p>Other tests follow a bit different approach: they use <code>run_make_with_options</code>/<code>compare_output</code> pair of functions to verify the expected output that Make produces. My assumption is that this alternative way is the old way of writing tests - we can clearly see that it is the easier and cleaner way to write tests using the test template from above. Below I have collected 3 examples which use both approaches based on either:</p>
+
+<ul>
+<li><code>run_make_test</code></li>
+</ul>
+
+<p>or</p>
+
+<ul>
+<li><code>run_make_with_options</code>/<code>compare_output</code></li>
+</ul>
+
+<p>These functions are located in the file: <code>tests/run_make_tests.pl</code> which is a test driver file for the whole test suite (the file is too long so it is not discussed in this post).</p>
+
+<h4 id="test-case-example-1-simple-functionality-of-make">Test case example #1: Simple functionality of make</h4>
+
+<p>The following test is located at <code>tests/scripts/misc/general1</code>.</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">#                                                                    -*-perl-*-</span>
+
+
+<span style="color: #19177C">$description</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;The following test creates a makefile to test the</span>
+<span style="color: #BA2121">simple functionality of make.  It mimics the</span>
+<span style="color: #BA2121">rebuilding of a product with dependencies.</span>
+<span style="color: #BA2121">It also tests the simple definition of VPATH.&quot;</span>;
+
+<span style="color: #008000">open</span>(MAKEFILE,<span style="color: #BA2121">&quot;&gt; $makefile&quot;</span>);
+
+<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&lt;&lt;EOF;</span>
+<span style="color: #BA2121">VPATH = $workdir</span>
+<span style="color: #BA2121">edit:  main.o kbd.o commands.o display.o \\</span>
+<span style="color: #BA2121">       insert.o</span>
+<span style="color: #BA2121">\t\@echo cc -o edit main.o kbd.o commands.o display.o \\</span>
+<span style="color: #BA2121">                  insert.o</span>
+<span style="color: #BA2121">main.o : main.c defs.h</span>
+<span style="color: #BA2121">\t\@echo cc -c main.c</span>
+<span style="color: #BA2121">kbd.o : kbd.c defs.h command.h</span>
+<span style="color: #BA2121">\t\@echo cc -c kbd.c</span>
+<span style="color: #BA2121">commands.o : command.c defs.h command.h</span>
+<span style="color: #BA2121">\t\@echo cc -c commands.c</span>
+<span style="color: #BA2121">display.o : display.c defs.h buffer.h</span>
+<span style="color: #BA2121">\t\@echo cc -c display.c</span>
+<span style="color: #BA2121">insert.o : insert.c defs.h buffer.h</span>
+<span style="color: #BA2121">\t\@echo cc -c insert.c</span>
+<span style="color: #BA2121">EOF</span>
+
+<span style="color: #008000">close</span>(MAKEFILE);
+
+
+<span style="color: #19177C">@files_to_touch</span> <span style="color: #666666">=</span> (<span style="color: #BA2121">&quot;$workdir${pathsep}main.c&quot;</span>,<span style="color: #BA2121">&quot;$workdir${pathsep}defs.h&quot;</span>,
+               <span style="color: #BA2121">&quot;$workdir${pathsep}kbd.c&quot;</span>,<span style="color: #BA2121">&quot;$workdir${pathsep}command.h&quot;</span>,
+               <span style="color: #BA2121">&quot;$workdir${pathsep}commands.c&quot;</span>,<span style="color: #BA2121">&quot;$workdir${pathsep}display.c&quot;</span>,
+               <span style="color: #BA2121">&quot;$workdir${pathsep}buffer.h&quot;</span>,<span style="color: #BA2121">&quot;$workdir${pathsep}insert.c&quot;</span>,
+	       <span style="color: #BA2121">&quot;$workdir${pathsep}command.c&quot;</span>);
+
+<span style="color: #666666">&amp;</span>touch(<span style="color: #19177C">@files_to_touch</span>);
+
+<span style="color: #666666">&amp;</span>run_make_with_options(<span style="color: #19177C">$makefile</span>,<span style="color: #BA2121">&quot;&quot;</span>,<span style="color: #666666">&amp;</span>get_logfile);
+
+<span style="color: #408080; font-style: italic"># Create the answer to what should be produced by this Makefile</span>
+<span style="color: #19177C">$answer</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;cc -c main.c\ncc -c kbd.c\ncc -c commands.c\ncc -c display.c</span>
+<span style="color: #BA2121">cc -c insert.c\ncc -o edit main.o kbd.o commands.o display.o insert.o\n&quot;</span>;
+
+<span style="color: #408080; font-style: italic"># COMPARE RESULTS</span>
+
+<span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">&amp;</span>compare_output(<span style="color: #19177C">$answer</span>,<span style="color: #666666">&amp;</span>get_logfile(<span style="color: #666666">1</span>))) {
+  <span style="color: #008000">unlink</span> <span style="color: #19177C">@files_to_touch</span>;
+}
+
+<span style="color: #666666">1</span>;
+</pre></div>
+
+<h4 id="test-case-example-2-phony-targets">Test case example #2: PHONY targets</h4>
+
+<p>The following test is located at <code>tests/scripts/targets/PHONY</code>.</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">#                                                                    -*-perl-*-</span>
+
+<span style="color: #19177C">$description</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;The following tests the use of a PHONY target.  It makes\n&quot;</span>
+              <span style="color: #666666">.</span><span style="color: #BA2121">&quot;sure that the rules under a target get executed even if\n&quot;</span>
+              <span style="color: #666666">.</span><span style="color: #BA2121">&quot;a filename of the same name of the target exists in the\n&quot;</span>
+              <span style="color: #666666">.</span><span style="color: #BA2121">&quot;directory.\n&quot;</span>;
+
+<span style="color: #19177C">$details</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;This makefile in this test declares the target clean to be a \n&quot;</span>
+          <span style="color: #666666">.</span><span style="color: #BA2121">&quot;PHONY target.  We then create a file named \&quot;clean\&quot; in the \n&quot;</span>
+          <span style="color: #666666">.</span><span style="color: #BA2121">&quot;directory.  Although this file exists, the rule under the target\n&quot;</span>
+          <span style="color: #666666">.</span><span style="color: #BA2121">&quot;clean should still execute because of it&#39;s phony status.&quot;</span>;
+
+<span style="color: #19177C">$example</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;EXAMPLE_FILE&quot;</span>;
+
+<span style="color: #008000">open</span>(MAKEFILE,<span style="color: #BA2121">&quot;&gt; $makefile&quot;</span>);
+
+<span style="color: #408080; font-style: italic"># The Contents of the MAKEFILE ...</span>
+
+<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;.PHONY : clean \n&quot;</span>;
+<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;all: \n&quot;</span>;
+<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;\t\@echo This makefile did not clean the dir ... good\n&quot;</span>;
+<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;clean: \n&quot;</span>;
+<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;\t$delete_command $example clean\n&quot;</span>;
+
+<span style="color: #408080; font-style: italic"># END of Contents of MAKEFILE</span>
+
+<span style="color: #008000">close</span>(MAKEFILE);
+
+<span style="color: #666666">&amp;</span>touch(<span style="color: #19177C">$example</span>);
+
+<span style="color: #408080; font-style: italic"># Create a file named &quot;clean&quot;.  This is the same name as the target clean</span>
+<span style="color: #408080; font-style: italic"># and tricks the target into thinking that it is up to date.  (Unless you</span>
+<span style="color: #408080; font-style: italic"># use the .PHONY target.</span>
+<span style="color: #666666">&amp;</span>touch(<span style="color: #BA2121">&quot;clean&quot;</span>);
+
+<span style="color: #19177C">$answer</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;$delete_command $example clean\n&quot;</span>;
+<span style="color: #666666">&amp;</span>run_make_with_options(<span style="color: #19177C">$makefile</span>,<span style="color: #BA2121">&quot;clean&quot;</span>,<span style="color: #666666">&amp;</span>get_logfile);
+
+<span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">-</span>f <span style="color: #19177C">$example</span>) {
+  <span style="color: #19177C">$test_passed</span> <span style="color: #666666">=</span> <span style="color: #666666">0</span>;
+}
+
+<span style="color: #666666">&amp;</span>compare_output(<span style="color: #19177C">$answer</span>,<span style="color: #666666">&amp;</span>get_logfile(<span style="color: #666666">1</span>));
+
+<span style="color: #666666">1</span>;
+</pre></div>
+
+<h4 id="test-case-example-3-warn-undefined-variables-option">Test case example #3: &ndash;warn-undefined-variables option</h4>
+
+<p>The following test is located at <code>tests/scripts/options/warn-undefined-variables</code>.</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">#                                                                    -*-perl-*-</span>
+
+<span style="color: #19177C">$description</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;Test the --warn-undefined-variables option.&quot;</span>;
+
+<span style="color: #19177C">$details</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;Verify that warnings are printed for referencing undefined variables.&quot;</span>;
+
+<span style="color: #408080; font-style: italic"># Without --warn-undefined-variables, nothing should happen</span>
+run_make_test(<span style="color: #BA2121">&#39;</span>
+<span style="color: #BA2121">EMPTY =</span>
+<span style="color: #BA2121">EREF = $(EMPTY)</span>
+<span style="color: #BA2121">UREF = $(UNDEFINED)</span>
+
+<span style="color: #BA2121">SEREF := $(EREF)</span>
+<span style="color: #BA2121">SUREF := $(UREF)</span>
+
+<span style="color: #BA2121">all: ; @echo ref $(EREF) $(UREF)&#39;</span>,
+              <span style="color: #BA2121">&#39;&#39;</span>, <span style="color: #BA2121">&#39;ref&#39;</span>);
+
+<span style="color: #408080; font-style: italic"># With --warn-undefined-variables, it should warn me</span>
+run_make_test(<span style="color: #008000">undef</span>, <span style="color: #BA2121">&#39;--warn-undefined-variables&#39;</span>,
+              <span style="color: #BA2121">&quot;#MAKEFILE#:7: warning: undefined variable &#39;UNDEFINED&#39;</span>
+<span style="color: #BA2121">#MAKEFILE#:9: warning: undefined variable &#39;UNDEFINED&#39;</span>
+<span style="color: #BA2121">ref&quot;</span>);
+
+<span style="color: #666666">1</span>;
+</pre></div>
+
+<h3 id="open-issues">Open issues</h3>
+
+<p>The file <code>tests/README</code> contains interesting section that one may read as high-level TODO list for the project (bold below is mine). It seems that there is some interesting stuff waiting for someone to contribute ;)</p>
+
+<blockquote>
+<h2 id="open-issues-1">Open Issues</h2>
+
+<p>The test suite has a number of problems which should be addressed. <strong>One
+VERY serious one is that there is no real documentation</strong>.  You just have
+to see the existing tests. Use the newer tests: many of the tests
+haven&rsquo;t been updated to use the latest/greatest test methods.  See the
+ChangeLog in the tests directory for pointers.</p>
+
+<p><strong>The second serious problem is that it&rsquo;s not parallelizable</strong>: it scribbles
+all over its installation directory and so can only test one make at a
+time. <strong>The third serious problem is that it&rsquo;s not relocatable</strong>: the only
+way it works when you build out of the source tree is to create
+symlinks, which doesn&rsquo;t work on every system and is bogus to boot. <strong>The
+fourth serious problem is that it doesn&rsquo;t create its own sandbox when
+running tests</strong>, so that if a test forgets to clean up after itself that
+can impact future tests.</p>
+</blockquote>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<ol>
+<li>GNU Make has 581 tests: solid test suite introduced as early as of 1992.</li>
+<li>All of these tests are integration tests: the final executable <code>make</code> is tested, not the parts of C code.</li>
+<li>Default GNU Make 3.81 on OSX machine is 10 years old, it fails 212 tests compared to the latest GNU Make 4.2 build from source which passes all of its tests green.</li>
+<li>There is always space for contribution: more documentation is needed, tests should have better sandboxing to achieve parallelism and removability.</li>
+</ol>
+
+<p>So far we have Rust and Javascript programming languages, NeoVim editor and XTerm terminal emulator in our plans. Let us know what projects or tools you would like to see covered in this series: <a href="http://lowlevelbits.org/system-under-test/">System Under Test</a>.</p>
+
+
+      
+      
+    </article>
+    
+ <aside><div id="disqus_thread"></div></aside>
+
+<script type="text/javascript">
+    if (window.location.hostname == "localhost")
+        return;
+
+     
+    var disqus_shortname = 'systemundertest';
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+  </main>
+
+  <nav class="pagination-single">
+    
+      <span class="previous">&larr; <a href="http://systemundertest.org/freebsd/" rel="prev">FreeBSD</a></span>
+    
+    
+  </nav>
+
+
+  
+  <footer role="contentinfo">
+    <div style="text-align:center;">
+      
+      Brought to you by developers
+      <br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+    </div>
+  </footer>
+
+
+</div>
+
+<script src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-80371307-1', 'auto');
+	ga('send', 'pageview');
+</script>
+
+</body>
+</html>
+

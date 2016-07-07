@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  
+  <meta charset="UTF-8">
+  <title>
+    LLVM | System Under Test
+  </title>
+
+
+  
+  <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1,initial-scale=1">
+
+  
+  <link rel="canonical" href="http://systemundertest.org/llvm/"/>
+
+  
+  <link rel="stylesheet" href="/css/sanitize.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="/css/highlight_monokai.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/custom.css">
+  
+  
+  <link href="http://systemundertest.org/index.xml" rel="alternate" type="application/rss+xml" title="System Under Test" />
+  <link href="http://systemundertest.org/index.xml" rel="feed" type="application/rss+xml" title="System Under Test" />
+
+  
+  
+
+  
+    <meta name="keywords" content="llvm,tests,fuzz testing,unit testing,performance testing,regression testing" />
+  
+
+  
+    <meta name="description" content="This article provides an overview of the test suites that are used by LLVM project to maintain a quality of its libraries and tools on a high level." />
+  
+ 
+
+</head>
+
+
+
+<body>
+<div class="container">
+
+  
+  <header role="banner">
+    <div class="row gutters">
+      <div id="site-title" class="col span_6">
+        <h1><a href="http://systemundertest.org/">System Under Test</a></h1>
+        <h2>How Software is Tested</h2>
+      </div>
+      <div id="social" class="col span_6">
+        <ul>
+          <li><a href="https://twitter.com/systemundertest" target="_blank">Twitter</a></li>
+          <li><a href="http://systemundertest.org/index.xml" type="application/rss+xml" target="_blank">RSS</a></li>
+          <li><a href="http://systemundertest.org//about">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+
+  
+  <main id="single" role="main">
+    <div class="article-header">
+      <h1>LLVM</h1>
+          <div class="meta">
+      Mar 24, 2016 &nbsp;
+      
+        #<a href="/categories/compilers">Compilers</a>&nbsp;
+      
+
+    </div>
+    <div class="meta">
+      
+      by @<a href="https://twitter.com/1101_debian" target="_blank">AlexDenisov</a>&nbsp;
+      
+    </div>
+
+
+    </div>
+    <article>
+      
+
+<h3 id="what-is-llvm-about">What is LLVM about?</h3>
+
+<p><a href="http://llvm.org">http://llvm.org</a> says that</p>
+
+<blockquote>
+<p>The LLVM Project is a collection of modular and reusable compiler and toolchain technologies.</p>
+</blockquote>
+
+<p>It is not that much I can add here besides one link:</p>
+
+<p><a href="http://aosabook.org/en/llvm.html">The Architecture of Open Source Applications: LLVM</a> by Chris Lattner.</p>
+
+<p>which sheds light on compilers in general and LLVM particularly.</p>
+
+<p>LLVM is rather an umbrella project than a single project. It consists of compiler, debugger, linker, assemblers for several CPUs and of the most important - its Core: back-end and middle-end.</p>
+
+<p>In this article I refer to LLVM as a back-end + middle-end, rather than the whole umbrella (that would be too much for one post).</p>
+
+<h3 id="tests">Tests</h3>
+
+<p>LLVM is a huge project. Therefore it has quite a few groups of tests: unit tests, regression tests, performance tracking and fuzzing tests.
+Since the project is not trivial the tools used for testing are mostly written from scratch and are part of LLVM project.
+Though, I wish I could use some of them without having LLVM as their dependency.</p>
+
+<h4 id="unit-tests">Unit Tests</h4>
+
+<p>Amount of unit tests is pretty small comparing to regression tests.
+One reason behind that decision is that LLVM internals constantly change all the time. Supporting tests under such conditions is very time consuming.
+However there are still parts that do not change very often, that is they are good target for unit testing.
+These tests are located in &lsquo;unittests&rsquo; directory.</p>
+
+<p>They can be run using <code>make</code>:</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>make check-llvm-unit
+</pre></div>
+
+<p>Showing this beautiful output:</p>
+
+<p><img src="/img/sut_llvm/unit_tests.png"
+  style=" display: block;
+          margin-left: auto;
+          margin-right: auto;
+          width: 100%;
+          height: auto;"
+  alt="Unit tests" /></p>
+
+<p>As you can see there are about 1,5k tests, and that leads to a pretty short execution time: ~30 seconds using 4 threads.</p>
+
+<p>Unit Tests are written using <a href="https://github.com/google/googletest">Google Test</a> framework.
+Here is an example of a simple test:</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">// unittests/Support/YAMLParserTest.cpp</span>
+TEST(YAMLParser, SameNodeIteratorOperatorNotEquals) {
+  SourceMgr SM;
+  yaml<span style="color: #666666">::</span>Stream Stream(<span style="color: #BA2121">&quot;[</span><span style="color: #BB6622; font-weight: bold">\&quot;</span><span style="color: #BA2121">1</span><span style="color: #BB6622; font-weight: bold">\&quot;</span><span style="color: #BA2121">, </span><span style="color: #BB6622; font-weight: bold">\&quot;</span><span style="color: #BA2121">2</span><span style="color: #BB6622; font-weight: bold">\&quot;</span><span style="color: #BA2121">]&quot;</span>, SM);
+
+  yaml<span style="color: #666666">::</span>SequenceNode <span style="color: #666666">*</span>Node <span style="color: #666666">=</span> dyn_cast<span style="color: #666666">&lt;</span>yaml<span style="color: #666666">::</span>SequenceNode<span style="color: #666666">&gt;</span>(
+                                              Stream.begin()<span style="color: #666666">-&gt;</span>getRoot());
+
+  <span style="color: #008000; font-weight: bold">auto</span> Begin <span style="color: #666666">=</span> Node<span style="color: #666666">-&gt;</span>begin();
+  <span style="color: #008000; font-weight: bold">auto</span> End <span style="color: #666666">=</span> Node<span style="color: #666666">-&gt;</span>end();
+
+  EXPECT_TRUE(Begin <span style="color: #666666">!=</span> End);
+  EXPECT_FALSE(Begin <span style="color: #666666">!=</span> Begin);
+  EXPECT_FALSE(End <span style="color: #666666">!=</span> End);
+}
+</pre></div>
+
+<p>Pretty trivial.
+Let&rsquo;s move forward and look at another, more interesting group of tests.</p>
+
+<h4 id="regression-tests">Regression Tests</h4>
+
+<p>The aim of this test suite is to verify the output of different tools, hence the internals can change separately from tests, making support less time-consuming.
+This test suite located in <code>test</code> directory.
+It is the largest group of tests used in LLVM. It is 10 times bigger than Unit Tests: ~15k vs ~1,5k.
+It takes about 4 minutes to run on my machine using 4 threads.</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>make check-llvm
+</pre></div>
+
+<p>The output is pretty similar to one above:</p>
+
+<p><img src="/img/sut_llvm/regression_tests.png"
+  style=" display: block;
+          margin-left: auto;
+          margin-right: auto;
+          width: 100%;
+          height: auto;"
+  alt="Regression tests" /></p>
+
+<p>Regression Tests (unlike Unit Tests) are using custom tools such as <a href="http://llvm.org/docs/CommandGuide/lit.html">lit (LLVM Integrated Tester)</a> and <a href="http://llvm.org/docs/CommandGuide/FileCheck.html">FileCheck</a>.
+Let&rsquo;s look at simple test to illustrate how it works:</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">; RUN: %lli %s | FileCheck %s</span>
+
+<span style="color: #19177C">@flt</span> = <span style="color: #008000; font-weight: bold">internal</span> <span style="color: #008000; font-weight: bold">global</span> <span style="color: #B00040">float</span> <span style="color: #666666">12.0e+0</span>
+<span style="color: #19177C">@str</span> = <span style="color: #008000; font-weight: bold">internal</span> <span style="color: #008000; font-weight: bold">constant</span> [<span style="color: #666666">18</span> <span style="color: #008000; font-weight: bold">x</span> <span style="color: #008000; font-weight: bold">i8</span>] <span style="color: #008000; font-weight: bold">c</span><span style="color: #BA2121">&quot;Double value: %f\0A\00&quot;</span>
+
+<span style="color: #008000; font-weight: bold">declare</span> <span style="color: #008000; font-weight: bold">i32</span> <span style="color: #19177C">@printf</span>(<span style="color: #008000; font-weight: bold">i8</span>* <span style="color: #008000; font-weight: bold">nocapture</span>, ...) <span style="color: #008000; font-weight: bold">nounwind</span>
+<span style="color: #008000; font-weight: bold">declare</span> <span style="color: #008000; font-weight: bold">i32</span> <span style="color: #19177C">@fflush</span>(<span style="color: #008000; font-weight: bold">i8</span>*) <span style="color: #008000; font-weight: bold">nounwind</span>
+
+<span style="color: #008000; font-weight: bold">define</span> <span style="color: #008000; font-weight: bold">i32</span> <span style="color: #19177C">@main</span>() {
+  <span style="color: #19177C">%flt</span> = <span style="color: #008000; font-weight: bold">load</span> <span style="color: #B00040">float</span>, <span style="color: #B00040">float</span>* <span style="color: #19177C">@flt</span>
+  <span style="color: #19177C">%float2</span> = <span style="color: #008000; font-weight: bold">frem</span> <span style="color: #B00040">float</span> <span style="color: #19177C">%flt</span>, <span style="color: #666666">5.0</span>
+  <span style="color: #19177C">%double1</span> = <span style="color: #008000; font-weight: bold">fpext</span> <span style="color: #B00040">float</span> <span style="color: #19177C">%float2</span> <span style="color: #008000; font-weight: bold">to</span> <span style="color: #B00040">double</span>
+  <span style="color: #008000; font-weight: bold">call</span> <span style="color: #008000; font-weight: bold">i32</span> (<span style="color: #008000; font-weight: bold">i8</span>*, ...) <span style="color: #19177C">@printf</span>(<span style="color: #008000; font-weight: bold">i8</span>* <span style="color: #008000; font-weight: bold">getelementptr</span> ([<span style="color: #666666">18</span> <span style="color: #008000; font-weight: bold">x</span> <span style="color: #008000; font-weight: bold">i8</span>], [<span style="color: #666666">18</span> <span style="color: #008000; font-weight: bold">x</span> <span style="color: #008000; font-weight: bold">i8</span>]* <span style="color: #19177C">@str</span>, <span style="color: #008000; font-weight: bold">i32</span> <span style="color: #666666">0</span>, <span style="color: #008000; font-weight: bold">i64</span> <span style="color: #666666">0</span>), <span style="color: #B00040">double</span> <span style="color: #19177C">%double1</span>)
+  <span style="color: #008000; font-weight: bold">call</span> <span style="color: #008000; font-weight: bold">i32</span> <span style="color: #19177C">@fflush</span>(<span style="color: #008000; font-weight: bold">i8</span>* <span style="color: #008000; font-weight: bold">null</span>)
+  <span style="color: #008000; font-weight: bold">ret</span> <span style="color: #008000; font-weight: bold">i32</span> <span style="color: #666666">0</span>
+}
+
+<span style="color: #408080; font-style: italic">; CHECK: Double value: 2.0</span>
+</pre></div>
+
+<p>This test can be split into three parts:</p>
+
+<p>Run command (the top line):</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">; RUN: %lli %s | FileCheck %s</span>
+</pre></div>
+
+<p>Expectations (the bottom line):</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">; CHECK: Double value: 2.0</span>
+</pre></div>
+
+<p>The rest (LLVM IR in the middle) is the body.</p>
+
+<p>All tests in this suite have one or more &lsquo;run&rsquo; command.
+<code>lit</code> uses set of rules to substitute the string into real runnable command. Substitutions are either built-in (such as <code>%s</code>) or configurable (such as <code>%lli</code>).
+<code>lit</code> replaces <code>%s</code> with the full path to a file under test, e.g.:</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>~/llvm/test/ExecutionEngine/frem.ll
+</pre></div>
+
+<p>Configurable substitutions however are taken from <code>lit.cfg</code> file, which is basically a Python script.</p>
+
+<p>For example, this config says that <code>%lli</code> is to be replaced with <code>/usr/local/bin/lli</code></p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>lli <span style="color: #666666">=</span> <span style="color: #BA2121">&#39;/usr/local/bin/lli&#39;</span>
+config<span style="color: #666666">.</span>substitutions<span style="color: #666666">.</span>append( (<span style="color: #BA2121">&#39;%lli&#39;</span>, lli ) )
+</pre></div>
+
+<p>Having these parameters in place <code>lit</code> will run the test using this command:</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>/usr/local/bin/lli ~/llvm/test/ExecutionEngine/frem.ll | FileCheck ~/llvm/test/ExecutionEngine/frem.ll
+</pre></div>
+
+<p>Which will interpret <code>frem.ll</code> using LLVM Interpreter (<code>lli</code>) and pass the output to the <code>FileCheck</code>. <code>FileCheck</code> in turn takes two arguments: filename with expectations and input that needs to be examined.</p>
+
+<p>Summary of this example:</p>
+
+<p>The test interprets the body (LLVM IR) from <code>~/llvm/test/ExecutionEngine/frem.ll</code> using LLVM Interpreter (<code>%lli</code> aka <code>/usr/local/bin/lli</code>) and checks if the output of interpretation contains string <code>Double value: 2.0</code>.</p>
+
+<p>Both <code>lit</code> and <code>FileCheck</code> have lots of useful options. Consider looking at documentation to learn more.</p>
+
+<p><em><strong>upd 22.06.16:</strong></em>
+As Daniel Dunbar <a href="https://twitter.com/daniel_dunbar/status/745285660626452480">mentioned</a> it possible to use <code>lit</code> without LLVM, simply by installing it using <code>pip</code>: <code>pip install lit</code></p>
+
+<h4 id="performance-tracking">Performance tracking</h4>
+
+<p>Performance is one of the most important goals of any software. LLVM is not an exception.</p>
+
+<p>Here LLVM also uses custom tool - <a href="http://llvm.org/docs/lnt/intro.html">LNT</a>. This tool was initially written to be used inside LLVM, but its design allows it to be usable for performance testing of any other software.</p>
+
+<p><a href="http://llvm.org/docs/TestingGuide.html#test-suite-overview">Performance tests suite</a> is not a part of LLVM source tree. It has to be fetched separately. It is a set of programs that are compiled and executed to track performance changes.</p>
+
+<p>Besides <code>LNT</code> the test suite can be used within CMake as described in <a href="http://llvm.org/docs/TestSuiteMakefileGuide.html">LLVM <code>test-suite</code> Guide</a></p>
+
+<p>At the moment of writing this article external test suite contains 485 test cases. It takes ~5 minutes to run them using <code>lit</code>.</p>
+
+<h4 id="fuzz-testing">Fuzz Testing</h4>
+
+<p>Another powerful technique used to increase quality of LLVM is <a href="https://en.wikipedia.org/wiki/Fuzz_testing">Fuzz Testing</a>.</p>
+
+<p>Here as well LLVM has its own tool called <a href="http://llvm.org/docs/LibFuzzer.html">LibFuzzer</a>.
+The tool is so great that it is also used by <a href="http://llvm.org/docs/LibFuzzer.html#trophies">other software</a> such as Python, PCRE, OpenSSL, SQLite, and other.</p>
+
+<p>Here is an example of a fuzz test:</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">// tools/llvm-as-fuzzer/llvm-as-fuzzer.cpp</span>
+<span style="color: #008000; font-weight: bold">extern</span> <span style="color: #BA2121">&quot;C&quot;</span> <span style="color: #B00040">int</span> LLVMFuzzerTestOneInput(<span style="color: #008000; font-weight: bold">const</span> <span style="color: #B00040">uint8_t</span> <span style="color: #666666">*</span>Data, <span style="color: #B00040">size_t</span> Size) {
+
+  <span style="color: #408080; font-style: italic">// Allocate space for locals before setjmp so that memory can be collected</span>
+  <span style="color: #408080; font-style: italic">// if parse exits prematurely (via longjmp).</span>
+  StringRef Input((<span style="color: #008000; font-weight: bold">const</span> <span style="color: #B00040">char</span> <span style="color: #666666">*</span>)Data, Size);
+  <span style="color: #408080; font-style: italic">// Note: We need to create a buffer to add a null terminator to the</span>
+  <span style="color: #408080; font-style: italic">// end of the input string. The parser assumes that the string</span>
+  <span style="color: #408080; font-style: italic">// parsed is always null terminated.</span>
+  std<span style="color: #666666">::</span>unique_ptr<span style="color: #666666">&lt;</span>MemoryBuffer<span style="color: #666666">&gt;</span> MemBuf <span style="color: #666666">=</span> MemoryBuffer<span style="color: #666666">::</span>getMemBufferCopy(Input);
+  SMDiagnostic Err;
+  LLVMContext <span style="color: #666666">&amp;</span>Context <span style="color: #666666">=</span> getGlobalContext();
+  std<span style="color: #666666">::</span>unique_ptr<span style="color: #666666">&lt;</span>Module<span style="color: #666666">&gt;</span> M;
+
+  <span style="color: #008000; font-weight: bold">if</span> (setjmp(JmpBuf))
+    <span style="color: #408080; font-style: italic">// If reached, we have returned with non-zero status, so exit.</span>
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #666666">0</span>;
+
+  <span style="color: #408080; font-style: italic">// TODO(kschimpf) Write a main to do this initialization.</span>
+  <span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">!</span>InstalledHandler) {
+    llvm<span style="color: #666666">::</span>install_fatal_error_handler(<span style="color: #666666">::</span>MyFatalErrorHandler, nullptr);
+    InstalledHandler <span style="color: #666666">=</span> <span style="color: #008000">true</span>;
+  }
+
+  M <span style="color: #666666">=</span> parseAssembly(MemBuf<span style="color: #666666">-&gt;</span>getMemBufferRef(), Err, Context);
+
+  <span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">!</span>M.get())
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #666666">0</span>;
+
+  verifyModule(<span style="color: #666666">*</span>M.get());
+  <span style="color: #008000; font-weight: bold">return</span> <span style="color: #666666">0</span>;
+}
+</pre></div>
+
+<p><code>LibFuzzer</code> generates huge amount of different inputs using <a href="https://en.wikipedia.org/wiki/Genetic_programming">Genetic programming</a> and calls <code>LLVMFuzzerTestOneInput</code> within each input.
+This test then tries to parse the input as an assembly. The parser should not crash.</p>
+
+<p>At the moment there are two targets for fuzz testing within LLVM source tree: <code>llvm-as-fuzzer</code> and <code>llvm-mc-fuzzer</code>. They are located in <code>tools</code> directory.</p>
+
+<h3 id="summary">Summary</h3>
+
+<p>LLVM uses a few test suites for different needs.
+There are ~1,5k Unit Tests, ~15k Regression Tests. It takes ~4-5 minutes to run both tests in Debug mode on 2 y/o MacBook Pro using 4 threads.</p>
+
+<p>LLVM uses Fuzzing Tests to prevent system from abnormal exit when erroneous input received.</p>
+
+<p>LLVM has out-of-source-tree test-suite for performance tracking.</p>
+
+<p>LLVM mostly uses custom tools for testing.</p>
+
+<h3 id="further-reading-additional-material">Further Reading / Additional Material</h3>
+
+<ul>
+<li><a href="http://llvm.org/docs/TestingGuide.html">LLVM Testing Infrastructure Guide</a></li>
+<li><a href="http://llvm.org/docs/CommandGuide/lit.html">LLVM Integrated Tester</a></li>
+<li><a href="http://llvm.org/docs/CommandGuide/FileCheck.html">FileCheck</a></li>
+<li><a href="http://llvm.org/docs/LibFuzzer.html">LibFuzzer</a></li>
+<li><a href="http://llvm.org/docs/TestSuiteMakefileGuide.html">LLVM test-suite Guide</a></li>
+<li><a href="http://llvm.org/docs/lnt/quickstart.html">LNT Quickstart Guide</a></li>
+</ul>
+
+
+      
+      
+    </article>
+    
+ <aside><div id="disqus_thread"></div></aside>
+
+<script type="text/javascript">
+    if (window.location.hostname == "localhost")
+        return;
+
+     
+    var disqus_shortname = 'systemundertest';
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+  </main>
+
+  <nav class="pagination-single">
+    
+    
+      <span class="next"><a href="http://systemundertest.org/freebsd/" rel="next">FreeBSD</a> &rarr;</span>
+    
+  </nav>
+
+
+  
+  <footer role="contentinfo">
+    <div style="text-align:center;">
+      
+      Brought to you by developers
+      <br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+    </div>
+  </footer>
+
+
+</div>
+
+<script src="/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-80371307-1', 'auto');
+	ga('send', 'pageview');
+</script>
+
+</body>
+</html>
+
