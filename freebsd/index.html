@@ -19,7 +19,8 @@
   
   <link rel="stylesheet" href="/css/sanitize.css">
   <link rel="stylesheet" href="/css/responsive.css">
-  <link rel="stylesheet" href="/css/highlight_monokai.css">
+  
+  <link rel="stylesheet" href="/css/syntax.css">
   <link rel="stylesheet" href="/css/theme.css">
   <link rel="stylesheet" href="/css/custom.css">
   
@@ -86,8 +87,6 @@
     <article>
       
 
-<p>This article is part of series <a href="http://lowlevelbits.org/system-under-test">&ldquo;System Under Test&rdquo;</a>. It provides an overview of the FreeBSD test suite and tools FreeBSD developers use to write and run tests.</p>
-
 <h3 id="what-is-the-project-about">What is the project about?</h3>
 
 <p>FreeBSD is a well known Unix-based operating system.</p>
@@ -107,11 +106,11 @@
 
 <p>If you are on FreeBSD 10.0 and want to see tests, then you just need to re-build the system from sources.
 Fortunately, it is very easy:</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #008000">echo</span> <span style="color: #BA2121">&quot;WITH_TESTS=YES&quot;</span> &gt;&gt; /etc/src.conf
-<span style="color: #008000">cd</span> /usr/src
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="nb">echo</span> <span class="s2">&quot;WITH_TESTS=YES&quot;</span> &gt;&gt; /etc/src.conf
+<span class="nb">cd</span> /usr/src
 make buildworld
 make installworld
-</pre></div>
+</code></pre></div>
 
 <h4 id="running-tests">Running tests</h4>
 
@@ -120,13 +119,13 @@ make installworld
 <p>Initially ATF provided both tools (e.g. test runner, report generator, etc.) and libraries (e.g. test cases, assertions, etc.). Over the years tools from ATF were replaced by Kyua.</p>
 
 <p>To run tests you need to point <code>kyua</code> to a <code>Kyuafile</code>.</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #008000">cd</span> /usr/tests
-kyua <span style="color: #008000">test</span> -k ./Kyuafile
-</pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="nb">cd</span> /usr/tests
+kyua <span class="nb">test</span> -k ./Kyuafile
+</code></pre></div>
 
 <p>when it’s done you may request report:</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>kyua report
-</pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span>kyua report
+</code></pre></div>
 
 <p>which shows brief information for all non-succeeded test and a summary, such as this one:</p>
 
@@ -141,11 +140,11 @@ kyua <span style="color: #008000">test</span> -k ./Kyuafile
 <h4 id="toolchain">Toolchain</h4>
 
 <p><code>Kyuafile</code> specifies which tests to run. It also can include other <code>Kyuafile</code>s. Here is an example:</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>include(<span style="color: #BA2121">&#39;lib/Kyuafile&#39;</span>)
-atf_test_program{name<span style="color: #666666">=</span><span style="color: #BA2121">&#39;some_atf_test&#39;</span>}
-plain_test_program{name<span style="color: #666666">=</span><span style="color: #BA2121">&#39;some_plain_test&#39;</span>}
-tap_test_program{name<span style="color: #666666">=</span><span style="color: #BA2121">&#39;some_tap_test&#39;</span>}
-</pre></div>
+<div class="highlight"><pre><code class="language-perl" data-lang="perl"><span></span><span class="n">include</span><span class="p">(</span><span class="s">&#39;lib/Kyuafile&#39;</span><span class="p">)</span>
+<span class="n">atf_test_program</span><span class="p">{</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;some_atf_test&#39;</span><span class="p">}</span>
+<span class="n">plain_test_program</span><span class="p">{</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;some_plain_test&#39;</span><span class="p">}</span>
+<span class="n">tap_test_program</span><span class="p">{</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;some_tap_test&#39;</span><span class="p">}</span>
+</code></pre></div>
 
 <p>When run <code>kyua</code> will execute all tests specified in <code>lib/Kyuafile</code> (and in <code>Kyuafile</code>s included from <code>lib/Kyuafile</code>), and then will execute three tests: ATF test <code>some_atf_test</code>, plain test <code>some_plain_test</code>, and <a href="https://en.wikipedia.org/wiki/Test_Anything_Protocol">TAP</a> test <code>some_tap_test</code>.</p>
 
@@ -156,57 +155,57 @@ tap_test_program{name<span style="color: #666666">=</span><span style="color: #B
 <p>ATF tests intended to be more sophisticated. They may contain several test cases per file and provide useful information besides the exit code. Also, the tests may be written using C, C++ and shell.</p>
 
 <p>Here is a part of an ATF test written in shell:</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #19177C">username</span><span style="color: #666666">=</span><span style="color: #BA2121">&quot;test5678901234567&quot;</span>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="nv">username</span><span class="o">=</span><span class="s2">&quot;test5678901234567&quot;</span>
 
 atf_test_case longname cleanup
 
-longname_head<span style="color: #666666">()</span> <span style="color: #666666">{</span>
-  atf_set <span style="color: #BA2121">&quot;require.user&quot;</span> <span style="color: #BA2121">&quot;root&quot;</span>
-  atf_set <span style="color: #BA2121">&quot;descr&quot;</span> <span style="color: #BA2121">&quot;Test that usernames longer than 16 &quot;</span> <span style="color: #BB6622; font-weight: bold">\</span>
-    <span style="color: #BA2121">&quot;characters are allowed (PR bin/39546)&quot;</span>
-<span style="color: #666666">}</span>
+longname_head<span class="o">()</span> <span class="o">{</span>
+  atf_set <span class="s2">&quot;require.user&quot;</span> <span class="s2">&quot;root&quot;</span>
+  atf_set <span class="s2">&quot;descr&quot;</span> <span class="s2">&quot;Test that usernames longer than 16 &quot;</span> <span class="se">\</span>
+    <span class="s2">&quot;characters are allowed (PR bin/39546)&quot;</span>
+<span class="o">}</span>
 
-longname_body<span style="color: #666666">()</span> <span style="color: #666666">{</span>
-  atf_check -s exit:0 -o ignore -e ignore -x <span style="color: #BA2121">&quot;pw useradd </span><span style="color: #19177C">$username</span><span style="color: #BA2121">&quot;</span>
-<span style="color: #666666">}</span>
+longname_body<span class="o">()</span> <span class="o">{</span>
+  atf_check -s exit:0 -o ignore -e ignore -x <span class="s2">&quot;pw useradd </span><span class="nv">$username</span><span class="s2">&quot;</span>
+<span class="o">}</span>
 
-longname_cleanup<span style="color: #666666">()</span> <span style="color: #666666">{</span>
-  atf_check -s ignore -o ignore -e ignore -x <span style="color: #BA2121">&quot;pw userdel </span><span style="color: #19177C">$username</span><span style="color: #BA2121">&quot;</span>
-<span style="color: #666666">}</span>
+longname_cleanup<span class="o">()</span> <span class="o">{</span>
+  atf_check -s ignore -o ignore -e ignore -x <span class="s2">&quot;pw userdel </span><span class="nv">$username</span><span class="s2">&quot;</span>
+<span class="o">}</span>
 
-atf_init_test_cases<span style="color: #666666">()</span> <span style="color: #666666">{</span>
+atf_init_test_cases<span class="o">()</span> <span class="o">{</span>
   atf_add_test_case longname
-<span style="color: #666666">}</span>
-</pre></div>
+<span class="o">}</span>
+</code></pre></div>
 
 <p>If you try to find there a test written let’s say in C, then you will not succeed. All tests under <code>/usr/tests</code> are executables.
 The reason is that FreeBSD tools and libraries usually have their tests source code in their source tree. During installation these tests are compiled and copied to the <code>/usr/tests</code>.
 For example, if you want to see tests for libc’ stdio, then you need to look at <code>/usr/src/lib/libc/tests/stdio</code>.
 At the moment there is one test, here is part of it:</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>ATF_TC_WITHOUT_HEAD(test_append_binary_pos);
-ATF_TC_BODY(test_append_binary_pos, tc)
-{
-  <span style="color: #408080; font-style: italic">/*</span>
-<span style="color: #408080; font-style: italic">  * For compatibility with other implementations (glibc), we set the</span>
-<span style="color: #408080; font-style: italic">  * position to 0 when opening an automatically allocated binary stream</span>
-<span style="color: #408080; font-style: italic">  * for appending.</span>
-<span style="color: #408080; font-style: italic">  */</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span></span><span class="n">ATF_TC_WITHOUT_HEAD</span><span class="p">(</span><span class="n">test_append_binary_pos</span><span class="p">);</span>
+<span class="n">ATF_TC_BODY</span><span class="p">(</span><span class="n">test_append_binary_pos</span><span class="p">,</span> <span class="n">tc</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="cm">/*</span>
+<span class="cm">  * For compatibility with other implementations (glibc), we set the</span>
+<span class="cm">  * position to 0 when opening an automatically allocated binary stream</span>
+<span class="cm">  * for appending.</span>
+<span class="cm">  */</span>
 
-  <span style="color: #B00040">FILE</span> <span style="color: #666666">*</span>fp;
+  <span class="kt">FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">;</span>
 
-  fp <span style="color: #666666">=</span> fmemopen(<span style="color: #008000">NULL</span>, <span style="color: #666666">16</span>, <span style="color: #BA2121">&quot;ab+&quot;</span>);
-  ATF_REQUIRE(ftell(fp) <span style="color: #666666">==</span> <span style="color: #666666">0L</span>);
-  fclose(fp);
+  <span class="n">fp</span> <span class="o">=</span> <span class="n">fmemopen</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="s">&quot;ab+&quot;</span><span class="p">);</span>
+  <span class="n">ATF_REQUIRE</span><span class="p">(</span><span class="n">ftell</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0L</span><span class="p">);</span>
+  <span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
 
-  <span style="color: #408080; font-style: italic">/*</span>
-<span style="color: #408080; font-style: italic">  * Make sure that a pre-allocated buffer behaves correctly.</span>
-<span style="color: #408080; font-style: italic">  */</span>
-  <span style="color: #B00040">char</span> buf[] <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;Hello&quot;</span>;
-  fp <span style="color: #666666">=</span> fmemopen(buf, <span style="color: #008000; font-weight: bold">sizeof</span>(buf), <span style="color: #BA2121">&quot;ab+&quot;</span>);
-  ATF_REQUIRE(ftell(fp) <span style="color: #666666">==</span> strlen(buf));
-  fclose(fp);
-}
-</pre></div>
+  <span class="cm">/*</span>
+<span class="cm">  * Make sure that a pre-allocated buffer behaves correctly.</span>
+<span class="cm">  */</span>
+  <span class="kt">char</span> <span class="n">buf</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&quot;Hello&quot;</span><span class="p">;</span>
+  <span class="n">fp</span> <span class="o">=</span> <span class="n">fmemopen</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span> <span class="s">&quot;ab+&quot;</span><span class="p">);</span>
+  <span class="n">ATF_REQUIRE</span><span class="p">(</span><span class="n">ftell</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span> <span class="o">==</span> <span class="n">strlen</span><span class="p">(</span><span class="n">buf</span><span class="p">));</span>
+  <span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
 
 <h3 id="conclusion">Conclusion</h3>
 
@@ -274,8 +273,8 @@ get any answer so far.</p>
 
 </div>
 
-<script src="/js/highlight.pack.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
+
+
 
 <script>
 	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

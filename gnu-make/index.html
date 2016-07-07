@@ -19,7 +19,8 @@
   
   <link rel="stylesheet" href="/css/sanitize.css">
   <link rel="stylesheet" href="/css/responsive.css">
-  <link rel="stylesheet" href="/css/highlight_monokai.css">
+  
+  <link rel="stylesheet" href="/css/syntax.css">
   <link rel="stylesheet" href="/css/theme.css">
   <link rel="stylesheet" href="/css/custom.css">
   
@@ -253,8 +254,8 @@ $ autoreconf # creates 'configure' script
 </pre>
 
 <p>Then we want to run this newly created script with <code>--prefix</code> parameter so that it will not install make to the <code>/usr/local/bin</code> directory but rather to <code>./Build</code> directory (to not conflict with OSX&rsquo;s Make which we don&rsquo;t want within the scope of this post).</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>$ ./configure --prefix<span style="color: #666666">=</span><span style="color: #008000; font-weight: bold">$(</span><span style="color: #008000">pwd</span><span style="color: #008000; font-weight: bold">)</span>/Build
-</pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span>$ ./configure --prefix<span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/Build
+</code></pre></div>
 
 <p>At this point if you run <code>make</code> the very first time you will likely see errors about some localization files missing:</p>
 
@@ -267,8 +268,8 @@ make: *** [all] Error 2
 </pre>
 
 <p>To fix that you have to first run (solution found at <a href="http://gnu-make.2324884.n4.nabble.com/NLS-related-failure-when-building-make-from-CVS-tp2157p2158.html">GNU Make forums</a>):</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span>make update
-</pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span>make update
+</code></pre></div>
 
 <p>Everything should work fine since then, finally we run:</p>
 
@@ -296,36 +297,36 @@ $ ./run_make_tests -make ../Build/bin/make
 </pre>
 
 <p>The results are quite pleasant to look at - <strong>GNU Make built from latest source code on Mac OS X machine, passes all of its tests</strong>:</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #666666">581</span> Tests in <span style="color: #666666">118</span> Categories Complete ... No Failures :-<span style="color: #666666">)</span>
-</pre></div>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="m">581</span> Tests in <span class="m">118</span> Categories Complete ... No Failures :-<span class="o">)</span>
+</code></pre></div>
 
 <h3 id="test-case-template">Test case template</h3>
 
 <p>The file <code>tests/scripts/test_template</code> is a generic template, most of the tests are based on it:</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">#                                                                    -*-perl-*-</span>
+<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span></span><span class="c1">#                                                                    -*-perl-*-</span>
 
-<span style="color: #19177C">$description</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;&lt;FILL IN SHORT DESCRIPTION HERE&gt;&quot;</span>;
-<span style="color: #19177C">$details</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;&lt;FILL IN DETAILS OF HOW YOU TEST WHAT YOU SAY YOU ARE TESTING&gt;&quot;</span>;
+<span class="nv">$description</span> <span class="o">=</span> <span class="s">&quot;&lt;FILL IN SHORT DESCRIPTION HERE&gt;&quot;</span><span class="p">;</span>
+<span class="nv">$details</span> <span class="o">=</span> <span class="s">&quot;&lt;FILL IN DETAILS OF HOW YOU TEST WHAT YOU SAY YOU ARE TESTING&gt;&quot;</span><span class="p">;</span>
 
-<span style="color: #408080; font-style: italic"># Run a make test.  See the documentation of run_make_test() in</span>
-<span style="color: #408080; font-style: italic"># run_make_tests.pl, but briefly the first argument is a string with the</span>
-<span style="color: #408080; font-style: italic"># contents of a makefile to be tested, the second is a string containing the</span>
-<span style="color: #408080; font-style: italic"># arguments to be passed to the make invocation, the third is a string</span>
-<span style="color: #408080; font-style: italic"># containing the expected output.  The fourth is the expected exit code for</span>
-<span style="color: #408080; font-style: italic"># make.  If not specified, it&#39;s assumed that the make program should succeed</span>
-<span style="color: #408080; font-style: italic"># (exit with 0).</span>
+<span class="c1"># Run a make test.  See the documentation of run_make_test() in</span>
+<span class="c1"># run_make_tests.pl, but briefly the first argument is a string with the</span>
+<span class="c1"># contents of a makefile to be tested, the second is a string containing the</span>
+<span class="c1"># arguments to be passed to the make invocation, the third is a string</span>
+<span class="c1"># containing the expected output.  The fourth is the expected exit code for</span>
+<span class="c1"># make.  If not specified, it&#39;s assumed that the make program should succeed</span>
+<span class="c1"># (exit with 0).</span>
 
-run_make_test(<span style="color: #BA2121">&#39;Your test makefile goes here&#39;</span>,
-              <span style="color: #BA2121">&#39;Arguments to pass to make go here&#39;</span>,
-              <span style="color: #BA2121">&#39;Expected output from the invocation goes here&#39;</span>);
+<span class="n">run_make_test</span><span class="p">(</span><span class="s">&#39;Your test makefile goes here&#39;</span><span class="p">,</span>
+              <span class="s">&#39;Arguments to pass to make go here&#39;</span><span class="p">,</span>
+              <span class="s">&#39;Expected output from the invocation goes here&#39;</span><span class="p">);</span>
 
-<span style="color: #408080; font-style: italic"># There are various special tokens, options, etc.  See the full documentation</span>
-<span style="color: #408080; font-style: italic"># in run_make_tests.pl.</span>
+<span class="c1"># There are various special tokens, options, etc.  See the full documentation</span>
+<span class="c1"># in run_make_tests.pl.</span>
 
 
-<span style="color: #408080; font-style: italic"># This tells the test driver that the perl test script executed properly.</span>
-<span style="color: #666666">1</span>;
-</pre></div>
+<span class="c1"># This tells the test driver that the perl test script executed properly.</span>
+<span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
 
 <p>Other tests follow a bit different approach: they use <code>run_make_with_options</code>/<code>compare_output</code> pair of functions to verify the expected output that Make produces. My assumption is that this alternative way is the old way of writing tests - we can clearly see that it is the easier and cleaner way to write tests using the test template from above. Below I have collected 3 examples which use both approaches based on either:</p>
 
@@ -344,139 +345,139 @@ run_make_test(<span style="color: #BA2121">&#39;Your test makefile goes here&#39
 <h4 id="test-case-example-1-simple-functionality-of-make">Test case example #1: Simple functionality of make</h4>
 
 <p>The following test is located at <code>tests/scripts/misc/general1</code>.</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">#                                                                    -*-perl-*-</span>
+<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span></span><span class="c1">#                                                                    -*-perl-*-</span>
 
 
-<span style="color: #19177C">$description</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;The following test creates a makefile to test the</span>
-<span style="color: #BA2121">simple functionality of make.  It mimics the</span>
-<span style="color: #BA2121">rebuilding of a product with dependencies.</span>
-<span style="color: #BA2121">It also tests the simple definition of VPATH.&quot;</span>;
+<span class="nv">$description</span> <span class="o">=</span> <span class="s">&quot;The following test creates a makefile to test the</span>
+<span class="s">simple functionality of make.  It mimics the</span>
+<span class="s">rebuilding of a product with dependencies.</span>
+<span class="s">It also tests the simple definition of VPATH.&quot;</span><span class="p">;</span>
 
-<span style="color: #008000">open</span>(MAKEFILE,<span style="color: #BA2121">&quot;&gt; $makefile&quot;</span>);
+<span class="nb">open</span><span class="p">(</span><span class="n">MAKEFILE</span><span class="p">,</span><span class="s">&quot;&gt; $makefile&quot;</span><span class="p">);</span>
 
-<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&lt;&lt;EOF;</span>
-<span style="color: #BA2121">VPATH = $workdir</span>
-<span style="color: #BA2121">edit:  main.o kbd.o commands.o display.o \\</span>
-<span style="color: #BA2121">       insert.o</span>
-<span style="color: #BA2121">\t\@echo cc -o edit main.o kbd.o commands.o display.o \\</span>
-<span style="color: #BA2121">                  insert.o</span>
-<span style="color: #BA2121">main.o : main.c defs.h</span>
-<span style="color: #BA2121">\t\@echo cc -c main.c</span>
-<span style="color: #BA2121">kbd.o : kbd.c defs.h command.h</span>
-<span style="color: #BA2121">\t\@echo cc -c kbd.c</span>
-<span style="color: #BA2121">commands.o : command.c defs.h command.h</span>
-<span style="color: #BA2121">\t\@echo cc -c commands.c</span>
-<span style="color: #BA2121">display.o : display.c defs.h buffer.h</span>
-<span style="color: #BA2121">\t\@echo cc -c display.c</span>
-<span style="color: #BA2121">insert.o : insert.c defs.h buffer.h</span>
-<span style="color: #BA2121">\t\@echo cc -c insert.c</span>
-<span style="color: #BA2121">EOF</span>
+<span class="k">print</span> <span class="n">MAKEFILE</span> <span class="s">&lt;&lt;EOF;</span>
+<span class="s">VPATH = $workdir</span>
+<span class="s">edit:  main.o kbd.o commands.o display.o \\</span>
+<span class="s">       insert.o</span>
+<span class="s">\t\@echo cc -o edit main.o kbd.o commands.o display.o \\</span>
+<span class="s">                  insert.o</span>
+<span class="s">main.o : main.c defs.h</span>
+<span class="s">\t\@echo cc -c main.c</span>
+<span class="s">kbd.o : kbd.c defs.h command.h</span>
+<span class="s">\t\@echo cc -c kbd.c</span>
+<span class="s">commands.o : command.c defs.h command.h</span>
+<span class="s">\t\@echo cc -c commands.c</span>
+<span class="s">display.o : display.c defs.h buffer.h</span>
+<span class="s">\t\@echo cc -c display.c</span>
+<span class="s">insert.o : insert.c defs.h buffer.h</span>
+<span class="s">\t\@echo cc -c insert.c</span>
+<span class="s">EOF</span>
 
-<span style="color: #008000">close</span>(MAKEFILE);
+<span class="nb">close</span><span class="p">(</span><span class="n">MAKEFILE</span><span class="p">);</span>
 
 
-<span style="color: #19177C">@files_to_touch</span> <span style="color: #666666">=</span> (<span style="color: #BA2121">&quot;$workdir${pathsep}main.c&quot;</span>,<span style="color: #BA2121">&quot;$workdir${pathsep}defs.h&quot;</span>,
-               <span style="color: #BA2121">&quot;$workdir${pathsep}kbd.c&quot;</span>,<span style="color: #BA2121">&quot;$workdir${pathsep}command.h&quot;</span>,
-               <span style="color: #BA2121">&quot;$workdir${pathsep}commands.c&quot;</span>,<span style="color: #BA2121">&quot;$workdir${pathsep}display.c&quot;</span>,
-               <span style="color: #BA2121">&quot;$workdir${pathsep}buffer.h&quot;</span>,<span style="color: #BA2121">&quot;$workdir${pathsep}insert.c&quot;</span>,
-	       <span style="color: #BA2121">&quot;$workdir${pathsep}command.c&quot;</span>);
+<span class="nv">@files_to_touch</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;$workdir${pathsep}main.c&quot;</span><span class="p">,</span><span class="s">&quot;$workdir${pathsep}defs.h&quot;</span><span class="p">,</span>
+               <span class="s">&quot;$workdir${pathsep}kbd.c&quot;</span><span class="p">,</span><span class="s">&quot;$workdir${pathsep}command.h&quot;</span><span class="p">,</span>
+               <span class="s">&quot;$workdir${pathsep}commands.c&quot;</span><span class="p">,</span><span class="s">&quot;$workdir${pathsep}display.c&quot;</span><span class="p">,</span>
+               <span class="s">&quot;$workdir${pathsep}buffer.h&quot;</span><span class="p">,</span><span class="s">&quot;$workdir${pathsep}insert.c&quot;</span><span class="p">,</span>
+	       <span class="s">&quot;$workdir${pathsep}command.c&quot;</span><span class="p">);</span>
 
-<span style="color: #666666">&amp;</span>touch(<span style="color: #19177C">@files_to_touch</span>);
+<span class="o">&amp;</span><span class="n">touch</span><span class="p">(</span><span class="nv">@files_to_touch</span><span class="p">);</span>
 
-<span style="color: #666666">&amp;</span>run_make_with_options(<span style="color: #19177C">$makefile</span>,<span style="color: #BA2121">&quot;&quot;</span>,<span style="color: #666666">&amp;</span>get_logfile);
+<span class="o">&amp;</span><span class="n">run_make_with_options</span><span class="p">(</span><span class="nv">$makefile</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="o">&amp;</span><span class="n">get_logfile</span><span class="p">);</span>
 
-<span style="color: #408080; font-style: italic"># Create the answer to what should be produced by this Makefile</span>
-<span style="color: #19177C">$answer</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;cc -c main.c\ncc -c kbd.c\ncc -c commands.c\ncc -c display.c</span>
-<span style="color: #BA2121">cc -c insert.c\ncc -o edit main.o kbd.o commands.o display.o insert.o\n&quot;</span>;
+<span class="c1"># Create the answer to what should be produced by this Makefile</span>
+<span class="nv">$answer</span> <span class="o">=</span> <span class="s">&quot;cc -c main.c\ncc -c kbd.c\ncc -c commands.c\ncc -c display.c</span>
+<span class="s">cc -c insert.c\ncc -o edit main.o kbd.o commands.o display.o insert.o\n&quot;</span><span class="p">;</span>
 
-<span style="color: #408080; font-style: italic"># COMPARE RESULTS</span>
+<span class="c1"># COMPARE RESULTS</span>
 
-<span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">&amp;</span>compare_output(<span style="color: #19177C">$answer</span>,<span style="color: #666666">&amp;</span>get_logfile(<span style="color: #666666">1</span>))) {
-  <span style="color: #008000">unlink</span> <span style="color: #19177C">@files_to_touch</span>;
-}
+<span class="k">if</span> <span class="p">(</span><span class="o">&amp;</span><span class="n">compare_output</span><span class="p">(</span><span class="nv">$answer</span><span class="p">,</span><span class="o">&amp;</span><span class="n">get_logfile</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="p">{</span>
+  <span class="nb">unlink</span> <span class="nv">@files_to_touch</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span style="color: #666666">1</span>;
-</pre></div>
+<span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
 
 <h4 id="test-case-example-2-phony-targets">Test case example #2: PHONY targets</h4>
 
 <p>The following test is located at <code>tests/scripts/targets/PHONY</code>.</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">#                                                                    -*-perl-*-</span>
+<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span></span><span class="c1">#                                                                    -*-perl-*-</span>
 
-<span style="color: #19177C">$description</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;The following tests the use of a PHONY target.  It makes\n&quot;</span>
-              <span style="color: #666666">.</span><span style="color: #BA2121">&quot;sure that the rules under a target get executed even if\n&quot;</span>
-              <span style="color: #666666">.</span><span style="color: #BA2121">&quot;a filename of the same name of the target exists in the\n&quot;</span>
-              <span style="color: #666666">.</span><span style="color: #BA2121">&quot;directory.\n&quot;</span>;
+<span class="nv">$description</span> <span class="o">=</span> <span class="s">&quot;The following tests the use of a PHONY target.  It makes\n&quot;</span>
+              <span class="o">.</span><span class="s">&quot;sure that the rules under a target get executed even if\n&quot;</span>
+              <span class="o">.</span><span class="s">&quot;a filename of the same name of the target exists in the\n&quot;</span>
+              <span class="o">.</span><span class="s">&quot;directory.\n&quot;</span><span class="p">;</span>
 
-<span style="color: #19177C">$details</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;This makefile in this test declares the target clean to be a \n&quot;</span>
-          <span style="color: #666666">.</span><span style="color: #BA2121">&quot;PHONY target.  We then create a file named \&quot;clean\&quot; in the \n&quot;</span>
-          <span style="color: #666666">.</span><span style="color: #BA2121">&quot;directory.  Although this file exists, the rule under the target\n&quot;</span>
-          <span style="color: #666666">.</span><span style="color: #BA2121">&quot;clean should still execute because of it&#39;s phony status.&quot;</span>;
+<span class="nv">$details</span> <span class="o">=</span> <span class="s">&quot;This makefile in this test declares the target clean to be a \n&quot;</span>
+          <span class="o">.</span><span class="s">&quot;PHONY target.  We then create a file named \&quot;clean\&quot; in the \n&quot;</span>
+          <span class="o">.</span><span class="s">&quot;directory.  Although this file exists, the rule under the target\n&quot;</span>
+          <span class="o">.</span><span class="s">&quot;clean should still execute because of it&#39;s phony status.&quot;</span><span class="p">;</span>
 
-<span style="color: #19177C">$example</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;EXAMPLE_FILE&quot;</span>;
+<span class="nv">$example</span> <span class="o">=</span> <span class="s">&quot;EXAMPLE_FILE&quot;</span><span class="p">;</span>
 
-<span style="color: #008000">open</span>(MAKEFILE,<span style="color: #BA2121">&quot;&gt; $makefile&quot;</span>);
+<span class="nb">open</span><span class="p">(</span><span class="n">MAKEFILE</span><span class="p">,</span><span class="s">&quot;&gt; $makefile&quot;</span><span class="p">);</span>
 
-<span style="color: #408080; font-style: italic"># The Contents of the MAKEFILE ...</span>
+<span class="c1"># The Contents of the MAKEFILE ...</span>
 
-<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;.PHONY : clean \n&quot;</span>;
-<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;all: \n&quot;</span>;
-<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;\t\@echo This makefile did not clean the dir ... good\n&quot;</span>;
-<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;clean: \n&quot;</span>;
-<span style="color: #008000; font-weight: bold">print</span> MAKEFILE <span style="color: #BA2121">&quot;\t$delete_command $example clean\n&quot;</span>;
+<span class="k">print</span> <span class="n">MAKEFILE</span> <span class="s">&quot;.PHONY : clean \n&quot;</span><span class="p">;</span>
+<span class="k">print</span> <span class="n">MAKEFILE</span> <span class="s">&quot;all: \n&quot;</span><span class="p">;</span>
+<span class="k">print</span> <span class="n">MAKEFILE</span> <span class="s">&quot;\t\@echo This makefile did not clean the dir ... good\n&quot;</span><span class="p">;</span>
+<span class="k">print</span> <span class="n">MAKEFILE</span> <span class="s">&quot;clean: \n&quot;</span><span class="p">;</span>
+<span class="k">print</span> <span class="n">MAKEFILE</span> <span class="s">&quot;\t$delete_command $example clean\n&quot;</span><span class="p">;</span>
 
-<span style="color: #408080; font-style: italic"># END of Contents of MAKEFILE</span>
+<span class="c1"># END of Contents of MAKEFILE</span>
 
-<span style="color: #008000">close</span>(MAKEFILE);
+<span class="nb">close</span><span class="p">(</span><span class="n">MAKEFILE</span><span class="p">);</span>
 
-<span style="color: #666666">&amp;</span>touch(<span style="color: #19177C">$example</span>);
+<span class="o">&amp;</span><span class="n">touch</span><span class="p">(</span><span class="nv">$example</span><span class="p">);</span>
 
-<span style="color: #408080; font-style: italic"># Create a file named &quot;clean&quot;.  This is the same name as the target clean</span>
-<span style="color: #408080; font-style: italic"># and tricks the target into thinking that it is up to date.  (Unless you</span>
-<span style="color: #408080; font-style: italic"># use the .PHONY target.</span>
-<span style="color: #666666">&amp;</span>touch(<span style="color: #BA2121">&quot;clean&quot;</span>);
+<span class="c1"># Create a file named &quot;clean&quot;.  This is the same name as the target clean</span>
+<span class="c1"># and tricks the target into thinking that it is up to date.  (Unless you</span>
+<span class="c1"># use the .PHONY target.</span>
+<span class="o">&amp;</span><span class="n">touch</span><span class="p">(</span><span class="s">&quot;clean&quot;</span><span class="p">);</span>
 
-<span style="color: #19177C">$answer</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;$delete_command $example clean\n&quot;</span>;
-<span style="color: #666666">&amp;</span>run_make_with_options(<span style="color: #19177C">$makefile</span>,<span style="color: #BA2121">&quot;clean&quot;</span>,<span style="color: #666666">&amp;</span>get_logfile);
+<span class="nv">$answer</span> <span class="o">=</span> <span class="s">&quot;$delete_command $example clean\n&quot;</span><span class="p">;</span>
+<span class="o">&amp;</span><span class="n">run_make_with_options</span><span class="p">(</span><span class="nv">$makefile</span><span class="p">,</span><span class="s">&quot;clean&quot;</span><span class="p">,</span><span class="o">&amp;</span><span class="n">get_logfile</span><span class="p">);</span>
 
-<span style="color: #008000; font-weight: bold">if</span> (<span style="color: #666666">-</span>f <span style="color: #19177C">$example</span>) {
-  <span style="color: #19177C">$test_passed</span> <span style="color: #666666">=</span> <span style="color: #666666">0</span>;
-}
+<span class="k">if</span> <span class="p">(</span><span class="o">-</span><span class="n">f</span> <span class="nv">$example</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nv">$test_passed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span style="color: #666666">&amp;</span>compare_output(<span style="color: #19177C">$answer</span>,<span style="color: #666666">&amp;</span>get_logfile(<span style="color: #666666">1</span>));
+<span class="o">&amp;</span><span class="n">compare_output</span><span class="p">(</span><span class="nv">$answer</span><span class="p">,</span><span class="o">&amp;</span><span class="n">get_logfile</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
 
-<span style="color: #666666">1</span>;
-</pre></div>
+<span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
 
 <h4 id="test-case-example-3-warn-undefined-variables-option">Test case example #3: &ndash;warn-undefined-variables option</h4>
 
 <p>The following test is located at <code>tests/scripts/options/warn-undefined-variables</code>.</p>
-<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span></span><span style="color: #408080; font-style: italic">#                                                                    -*-perl-*-</span>
+<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span></span><span class="c1">#                                                                    -*-perl-*-</span>
 
-<span style="color: #19177C">$description</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;Test the --warn-undefined-variables option.&quot;</span>;
+<span class="nv">$description</span> <span class="o">=</span> <span class="s">&quot;Test the --warn-undefined-variables option.&quot;</span><span class="p">;</span>
 
-<span style="color: #19177C">$details</span> <span style="color: #666666">=</span> <span style="color: #BA2121">&quot;Verify that warnings are printed for referencing undefined variables.&quot;</span>;
+<span class="nv">$details</span> <span class="o">=</span> <span class="s">&quot;Verify that warnings are printed for referencing undefined variables.&quot;</span><span class="p">;</span>
 
-<span style="color: #408080; font-style: italic"># Without --warn-undefined-variables, nothing should happen</span>
-run_make_test(<span style="color: #BA2121">&#39;</span>
-<span style="color: #BA2121">EMPTY =</span>
-<span style="color: #BA2121">EREF = $(EMPTY)</span>
-<span style="color: #BA2121">UREF = $(UNDEFINED)</span>
+<span class="c1"># Without --warn-undefined-variables, nothing should happen</span>
+<span class="n">run_make_test</span><span class="p">(</span><span class="s">&#39;</span>
+<span class="s">EMPTY =</span>
+<span class="s">EREF = $(EMPTY)</span>
+<span class="s">UREF = $(UNDEFINED)</span>
 
-<span style="color: #BA2121">SEREF := $(EREF)</span>
-<span style="color: #BA2121">SUREF := $(UREF)</span>
+<span class="s">SEREF := $(EREF)</span>
+<span class="s">SUREF := $(UREF)</span>
 
-<span style="color: #BA2121">all: ; @echo ref $(EREF) $(UREF)&#39;</span>,
-              <span style="color: #BA2121">&#39;&#39;</span>, <span style="color: #BA2121">&#39;ref&#39;</span>);
+<span class="s">all: ; @echo ref $(EREF) $(UREF)&#39;</span><span class="p">,</span>
+              <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="s">&#39;ref&#39;</span><span class="p">);</span>
 
-<span style="color: #408080; font-style: italic"># With --warn-undefined-variables, it should warn me</span>
-run_make_test(<span style="color: #008000">undef</span>, <span style="color: #BA2121">&#39;--warn-undefined-variables&#39;</span>,
-              <span style="color: #BA2121">&quot;#MAKEFILE#:7: warning: undefined variable &#39;UNDEFINED&#39;</span>
-<span style="color: #BA2121">#MAKEFILE#:9: warning: undefined variable &#39;UNDEFINED&#39;</span>
-<span style="color: #BA2121">ref&quot;</span>);
+<span class="c1"># With --warn-undefined-variables, it should warn me</span>
+<span class="n">run_make_test</span><span class="p">(</span><span class="nb">undef</span><span class="p">,</span> <span class="s">&#39;--warn-undefined-variables&#39;</span><span class="p">,</span>
+              <span class="s">&quot;#MAKEFILE#:7: warning: undefined variable &#39;UNDEFINED&#39;</span>
+<span class="s">#MAKEFILE#:9: warning: undefined variable &#39;UNDEFINED&#39;</span>
+<span class="s">ref&quot;</span><span class="p">);</span>
 
-<span style="color: #666666">1</span>;
-</pre></div>
+<span class="mi">1</span><span class="p">;</span>
+</code></pre></div>
 
 <h3 id="open-issues">Open issues</h3>
 
@@ -557,8 +558,8 @@ can impact future tests.</p>
 
 </div>
 
-<script src="/js/highlight.pack.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
+
+
 
 <script>
 	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

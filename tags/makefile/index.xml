@@ -184,8 +184,8 @@ $ autoreconf # creates &#39;configure&#39; script
 &lt;/pre&gt;
 
 &lt;p&gt;Then we want to run this newly created script with &lt;code&gt;--prefix&lt;/code&gt; parameter so that it will not install make to the &lt;code&gt;/usr/local/bin&lt;/code&gt; directory but rather to &lt;code&gt;./Build&lt;/code&gt; directory (to not conflict with OSX&amp;rsquo;s Make which we don&amp;rsquo;t want within the scope of this post).&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;$ ./configure --prefix&lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;$(&lt;/span&gt;&lt;span style=&#34;color: #008000&#34;&gt;pwd&lt;/span&gt;&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;)&lt;/span&gt;/Build
-&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;$ ./configure --prefix&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;pwd&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/Build
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;At this point if you run &lt;code&gt;make&lt;/code&gt; the very first time you will likely see errors about some localization files missing:&lt;/p&gt;
 
@@ -198,8 +198,8 @@ make: *** [all] Error 2
 &lt;/pre&gt;
 
 &lt;p&gt;To fix that you have to first run (solution found at &lt;a href=&#34;http://gnu-make.2324884.n4.nabble.com/NLS-related-failure-when-building-make-from-CVS-tp2157p2158.html&#34;&gt;GNU Make forums&lt;/a&gt;):&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;make update
-&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;make update
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Everything should work fine since then, finally we run:&lt;/p&gt;
 
@@ -227,36 +227,36 @@ $ ./run_make_tests -make ../Build/bin/make
 &lt;/pre&gt;
 
 &lt;p&gt;The results are quite pleasant to look at - &lt;strong&gt;GNU Make built from latest source code on Mac OS X machine, passes all of its tests&lt;/strong&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #666666&#34;&gt;581&lt;/span&gt; Tests in &lt;span style=&#34;color: #666666&#34;&gt;118&lt;/span&gt; Categories Complete ... No Failures :-&lt;span style=&#34;color: #666666&#34;&gt;)&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;581&lt;/span&gt; Tests in &lt;span class=&#34;m&#34;&gt;118&lt;/span&gt; Categories Complete ... No Failures :-&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h3 id=&#34;test-case-template&#34;&gt;Test case template&lt;/h3&gt;
 
 &lt;p&gt;The file &lt;code&gt;tests/scripts/test_template&lt;/code&gt; is a generic template, most of the tests are based on it:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
-&lt;span style=&#34;color: #19177C&#34;&gt;$description&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;&amp;lt;FILL IN SHORT DESCRIPTION HERE&amp;gt;&amp;quot;&lt;/span&gt;;
-&lt;span style=&#34;color: #19177C&#34;&gt;$details&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;&amp;lt;FILL IN DETAILS OF HOW YOU TEST WHAT YOU SAY YOU ARE TESTING&amp;gt;&amp;quot;&lt;/span&gt;;
+&lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;FILL IN SHORT DESCRIPTION HERE&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;$details&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;FILL IN DETAILS OF HOW YOU TEST WHAT YOU SAY YOU ARE TESTING&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# Run a make test.  See the documentation of run_make_test() in&lt;/span&gt;
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# run_make_tests.pl, but briefly the first argument is a string with the&lt;/span&gt;
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# contents of a makefile to be tested, the second is a string containing the&lt;/span&gt;
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# arguments to be passed to the make invocation, the third is a string&lt;/span&gt;
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# containing the expected output.  The fourth is the expected exit code for&lt;/span&gt;
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# make.  If not specified, it&amp;#39;s assumed that the make program should succeed&lt;/span&gt;
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# (exit with 0).&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# Run a make test.  See the documentation of run_make_test() in&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# run_make_tests.pl, but briefly the first argument is a string with the&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# contents of a makefile to be tested, the second is a string containing the&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# arguments to be passed to the make invocation, the third is a string&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# containing the expected output.  The fourth is the expected exit code for&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# make.  If not specified, it&amp;#39;s assumed that the make program should succeed&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# (exit with 0).&lt;/span&gt;
 
-run_make_test(&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;#39;Your test makefile goes here&amp;#39;&lt;/span&gt;,
-              &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;#39;Arguments to pass to make go here&amp;#39;&lt;/span&gt;,
-              &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;#39;Expected output from the invocation goes here&amp;#39;&lt;/span&gt;);
+&lt;span class=&#34;n&#34;&gt;run_make_test&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#39;Your test makefile goes here&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+              &lt;span class=&#34;s&#34;&gt;&amp;#39;Arguments to pass to make go here&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+              &lt;span class=&#34;s&#34;&gt;&amp;#39;Expected output from the invocation goes here&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# There are various special tokens, options, etc.  See the full documentation&lt;/span&gt;
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# in run_make_tests.pl.&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# There are various special tokens, options, etc.  See the full documentation&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# in run_make_tests.pl.&lt;/span&gt;
 
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# This tells the test driver that the perl test script executed properly.&lt;/span&gt;
-&lt;span style=&#34;color: #666666&#34;&gt;1&lt;/span&gt;;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&#34;c1&#34;&gt;# This tells the test driver that the perl test script executed properly.&lt;/span&gt;
+&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Other tests follow a bit different approach: they use &lt;code&gt;run_make_with_options&lt;/code&gt;/&lt;code&gt;compare_output&lt;/code&gt; pair of functions to verify the expected output that Make produces. My assumption is that this alternative way is the old way of writing tests - we can clearly see that it is the easier and cleaner way to write tests using the test template from above. Below I have collected 3 examples which use both approaches based on either:&lt;/p&gt;
 
@@ -275,139 +275,139 @@ run_make_test(&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;#39;Your test make
 &lt;h4 id=&#34;test-case-example-1-simple-functionality-of-make&#34;&gt;Test case example #1: Simple functionality of make&lt;/h4&gt;
 
 &lt;p&gt;The following test is located at &lt;code&gt;tests/scripts/misc/general1&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
 
-&lt;span style=&#34;color: #19177C&#34;&gt;$description&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;The following test creates a makefile to test the&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;simple functionality of make.  It mimics the&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;rebuilding of a product with dependencies.&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;It also tests the simple definition of VPATH.&amp;quot;&lt;/span&gt;;
+&lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;The following test creates a makefile to test the&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;simple functionality of make.  It mimics the&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;rebuilding of a product with dependencies.&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;It also tests the simple definition of VPATH.&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
-&lt;span style=&#34;color: #008000&#34;&gt;open&lt;/span&gt;(MAKEFILE,&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;&amp;gt; $makefile&amp;quot;&lt;/span&gt;);
+&lt;span class=&#34;nb&#34;&gt;open&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;gt; $makefile&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;print&lt;/span&gt; MAKEFILE &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;lt;&amp;lt;EOF;&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;VPATH = $workdir&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;edit:  main.o kbd.o commands.o display.o \\&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;       insert.o&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;\t\@echo cc -o edit main.o kbd.o commands.o display.o \\&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;                  insert.o&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;main.o : main.c defs.h&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;\t\@echo cc -c main.c&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;kbd.o : kbd.c defs.h command.h&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;\t\@echo cc -c kbd.c&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;commands.o : command.c defs.h command.h&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;\t\@echo cc -c commands.c&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;display.o : display.c defs.h buffer.h&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;\t\@echo cc -c display.c&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;insert.o : insert.c defs.h buffer.h&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;\t\@echo cc -c insert.c&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;EOF&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;print&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;lt;&amp;lt;EOF;&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;VPATH = $workdir&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;edit:  main.o kbd.o commands.o display.o \\&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;       insert.o&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;\t\@echo cc -o edit main.o kbd.o commands.o display.o \\&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;                  insert.o&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;main.o : main.c defs.h&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;\t\@echo cc -c main.c&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;kbd.o : kbd.c defs.h command.h&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;\t\@echo cc -c kbd.c&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;commands.o : command.c defs.h command.h&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;\t\@echo cc -c commands.c&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;display.o : display.c defs.h buffer.h&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;\t\@echo cc -c display.c&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;insert.o : insert.c defs.h buffer.h&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;\t\@echo cc -c insert.c&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;EOF&lt;/span&gt;
 
-&lt;span style=&#34;color: #008000&#34;&gt;close&lt;/span&gt;(MAKEFILE);
+&lt;span class=&#34;nb&#34;&gt;close&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
 
-&lt;span style=&#34;color: #19177C&#34;&gt;@files_to_touch&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; (&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$workdir${pathsep}main.c&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$workdir${pathsep}defs.h&amp;quot;&lt;/span&gt;,
-               &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$workdir${pathsep}kbd.c&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$workdir${pathsep}command.h&amp;quot;&lt;/span&gt;,
-               &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$workdir${pathsep}commands.c&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$workdir${pathsep}display.c&amp;quot;&lt;/span&gt;,
-               &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$workdir${pathsep}buffer.h&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$workdir${pathsep}insert.c&amp;quot;&lt;/span&gt;,
-	       &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$workdir${pathsep}command.c&amp;quot;&lt;/span&gt;);
+&lt;span class=&#34;nv&#34;&gt;@files_to_touch&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;$workdir${pathsep}main.c&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;$workdir${pathsep}defs.h&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+               &lt;span class=&#34;s&#34;&gt;&amp;quot;$workdir${pathsep}kbd.c&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;$workdir${pathsep}command.h&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+               &lt;span class=&#34;s&#34;&gt;&amp;quot;$workdir${pathsep}commands.c&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;$workdir${pathsep}display.c&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+               &lt;span class=&#34;s&#34;&gt;&amp;quot;$workdir${pathsep}buffer.h&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;$workdir${pathsep}insert.c&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+	       &lt;span class=&#34;s&#34;&gt;&amp;quot;$workdir${pathsep}command.c&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;touch(&lt;span style=&#34;color: #19177C&#34;&gt;@files_to_touch&lt;/span&gt;);
+&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;touch&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;@files_to_touch&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;run_make_with_options(&lt;span style=&#34;color: #19177C&#34;&gt;$makefile&lt;/span&gt;,&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;get_logfile);
+&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;run_make_with_options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$makefile&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;get_logfile&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# Create the answer to what should be produced by this Makefile&lt;/span&gt;
-&lt;span style=&#34;color: #19177C&#34;&gt;$answer&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;cc -c main.c\ncc -c kbd.c\ncc -c commands.c\ncc -c display.c&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;cc -c insert.c\ncc -o edit main.o kbd.o commands.o display.o insert.o\n&amp;quot;&lt;/span&gt;;
+&lt;span class=&#34;c1&#34;&gt;# Create the answer to what should be produced by this Makefile&lt;/span&gt;
+&lt;span class=&#34;nv&#34;&gt;$answer&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;cc -c main.c\ncc -c kbd.c\ncc -c commands.c\ncc -c display.c&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;cc -c insert.c\ncc -o edit main.o kbd.o commands.o display.o insert.o\n&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# COMPARE RESULTS&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# COMPARE RESULTS&lt;/span&gt;
 
-&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;compare_output(&lt;span style=&#34;color: #19177C&#34;&gt;$answer&lt;/span&gt;,&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;get_logfile(&lt;span style=&#34;color: #666666&#34;&gt;1&lt;/span&gt;))) {
-  &lt;span style=&#34;color: #008000&#34;&gt;unlink&lt;/span&gt; &lt;span style=&#34;color: #19177C&#34;&gt;@files_to_touch&lt;/span&gt;;
-}
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;compare_output&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$answer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;get_logfile&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+  &lt;span class=&#34;nb&#34;&gt;unlink&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;@files_to_touch&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 
-&lt;span style=&#34;color: #666666&#34;&gt;1&lt;/span&gt;;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;test-case-example-2-phony-targets&#34;&gt;Test case example #2: PHONY targets&lt;/h4&gt;
 
 &lt;p&gt;The following test is located at &lt;code&gt;tests/scripts/targets/PHONY&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
-&lt;span style=&#34;color: #19177C&#34;&gt;$description&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;The following tests the use of a PHONY target.  It makes\n&amp;quot;&lt;/span&gt;
-              &lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;sure that the rules under a target get executed even if\n&amp;quot;&lt;/span&gt;
-              &lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;a filename of the same name of the target exists in the\n&amp;quot;&lt;/span&gt;
-              &lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;directory.\n&amp;quot;&lt;/span&gt;;
+&lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;The following tests the use of a PHONY target.  It makes\n&amp;quot;&lt;/span&gt;
+              &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;sure that the rules under a target get executed even if\n&amp;quot;&lt;/span&gt;
+              &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;a filename of the same name of the target exists in the\n&amp;quot;&lt;/span&gt;
+              &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;directory.\n&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
-&lt;span style=&#34;color: #19177C&#34;&gt;$details&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;This makefile in this test declares the target clean to be a \n&amp;quot;&lt;/span&gt;
-          &lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;PHONY target.  We then create a file named \&amp;quot;clean\&amp;quot; in the \n&amp;quot;&lt;/span&gt;
-          &lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;directory.  Although this file exists, the rule under the target\n&amp;quot;&lt;/span&gt;
-          &lt;span style=&#34;color: #666666&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;clean should still execute because of it&amp;#39;s phony status.&amp;quot;&lt;/span&gt;;
+&lt;span class=&#34;nv&#34;&gt;$details&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;This makefile in this test declares the target clean to be a \n&amp;quot;&lt;/span&gt;
+          &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;PHONY target.  We then create a file named \&amp;quot;clean\&amp;quot; in the \n&amp;quot;&lt;/span&gt;
+          &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;directory.  Although this file exists, the rule under the target\n&amp;quot;&lt;/span&gt;
+          &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;clean should still execute because of it&amp;#39;s phony status.&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
-&lt;span style=&#34;color: #19177C&#34;&gt;$example&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;EXAMPLE_FILE&amp;quot;&lt;/span&gt;;
+&lt;span class=&#34;nv&#34;&gt;$example&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;EXAMPLE_FILE&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
-&lt;span style=&#34;color: #008000&#34;&gt;open&lt;/span&gt;(MAKEFILE,&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;&amp;gt; $makefile&amp;quot;&lt;/span&gt;);
+&lt;span class=&#34;nb&#34;&gt;open&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;gt; $makefile&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# The Contents of the MAKEFILE ...&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# The Contents of the MAKEFILE ...&lt;/span&gt;
 
-&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;print&lt;/span&gt; MAKEFILE &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;.PHONY : clean \n&amp;quot;&lt;/span&gt;;
-&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;print&lt;/span&gt; MAKEFILE &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;all: \n&amp;quot;&lt;/span&gt;;
-&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;print&lt;/span&gt; MAKEFILE &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;\t\@echo This makefile did not clean the dir ... good\n&amp;quot;&lt;/span&gt;;
-&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;print&lt;/span&gt; MAKEFILE &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;clean: \n&amp;quot;&lt;/span&gt;;
-&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;print&lt;/span&gt; MAKEFILE &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;\t$delete_command $example clean\n&amp;quot;&lt;/span&gt;;
+&lt;span class=&#34;k&#34;&gt;print&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;.PHONY : clean \n&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;print&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;all: \n&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;print&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;\t\@echo This makefile did not clean the dir ... good\n&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;print&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;clean: \n&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;print&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;\t$delete_command $example clean\n&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# END of Contents of MAKEFILE&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# END of Contents of MAKEFILE&lt;/span&gt;
 
-&lt;span style=&#34;color: #008000&#34;&gt;close&lt;/span&gt;(MAKEFILE);
+&lt;span class=&#34;nb&#34;&gt;close&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;MAKEFILE&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;touch(&lt;span style=&#34;color: #19177C&#34;&gt;$example&lt;/span&gt;);
+&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;touch&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$example&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# Create a file named &amp;quot;clean&amp;quot;.  This is the same name as the target clean&lt;/span&gt;
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# and tricks the target into thinking that it is up to date.  (Unless you&lt;/span&gt;
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# use the .PHONY target.&lt;/span&gt;
-&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;touch(&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;clean&amp;quot;&lt;/span&gt;);
+&lt;span class=&#34;c1&#34;&gt;# Create a file named &amp;quot;clean&amp;quot;.  This is the same name as the target clean&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# and tricks the target into thinking that it is up to date.  (Unless you&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# use the .PHONY target.&lt;/span&gt;
+&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;touch&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;clean&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #19177C&#34;&gt;$answer&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;$delete_command $example clean\n&amp;quot;&lt;/span&gt;;
-&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;run_make_with_options(&lt;span style=&#34;color: #19177C&#34;&gt;$makefile&lt;/span&gt;,&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;clean&amp;quot;&lt;/span&gt;,&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;get_logfile);
+&lt;span class=&#34;nv&#34;&gt;$answer&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;$delete_command $example clean\n&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;run_make_with_options&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$makefile&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;clean&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;get_logfile&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #008000; font-weight: bold&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color: #666666&#34;&gt;-&lt;/span&gt;f &lt;span style=&#34;color: #19177C&#34;&gt;$example&lt;/span&gt;) {
-  &lt;span style=&#34;color: #19177C&#34;&gt;$test_passed&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;0&lt;/span&gt;;
-}
+&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;f&lt;/span&gt; &lt;span class=&#34;nv&#34;&gt;$example&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+  &lt;span class=&#34;nv&#34;&gt;$test_passed&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;mi&#34;&gt;0&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 
-&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;compare_output(&lt;span style=&#34;color: #19177C&#34;&gt;$answer&lt;/span&gt;,&lt;span style=&#34;color: #666666&#34;&gt;&amp;amp;&lt;/span&gt;get_logfile(&lt;span style=&#34;color: #666666&#34;&gt;1&lt;/span&gt;));
+&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;compare_output&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$answer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;get_logfile&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;));&lt;/span&gt;
 
-&lt;span style=&#34;color: #666666&#34;&gt;1&lt;/span&gt;;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h4 id=&#34;test-case-example-3-warn-undefined-variables-option&#34;&gt;Test case example #3: &amp;ndash;warn-undefined-variables option&lt;/h4&gt;
 
 &lt;p&gt;The following test is located at &lt;code&gt;tests/scripts/options/warn-undefined-variables&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
-&lt;span style=&#34;color: #19177C&#34;&gt;$description&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;Test the --warn-undefined-variables option.&amp;quot;&lt;/span&gt;;
+&lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Test the --warn-undefined-variables option.&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
-&lt;span style=&#34;color: #19177C&#34;&gt;$details&lt;/span&gt; &lt;span style=&#34;color: #666666&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;Verify that warnings are printed for referencing undefined variables.&amp;quot;&lt;/span&gt;;
+&lt;span class=&#34;nv&#34;&gt;$details&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Verify that warnings are printed for referencing undefined variables.&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# Without --warn-undefined-variables, nothing should happen&lt;/span&gt;
-run_make_test(&lt;span style=&#34;color: #BA2121&#34;&gt;&amp;#39;&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;EMPTY =&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;EREF = $(EMPTY)&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;UREF = $(UNDEFINED)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;# Without --warn-undefined-variables, nothing should happen&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;run_make_test&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#39;&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;EMPTY =&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;EREF = $(EMPTY)&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;UREF = $(UNDEFINED)&lt;/span&gt;
 
-&lt;span style=&#34;color: #BA2121&#34;&gt;SEREF := $(EREF)&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;SUREF := $(UREF)&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;SEREF := $(EREF)&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;SUREF := $(UREF)&lt;/span&gt;
 
-&lt;span style=&#34;color: #BA2121&#34;&gt;all: ; @echo ref $(EREF) $(UREF)&amp;#39;&lt;/span&gt;,
-              &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;#39;ref&amp;#39;&lt;/span&gt;);
+&lt;span class=&#34;s&#34;&gt;all: ; @echo ref $(EREF) $(UREF)&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+              &lt;span class=&#34;s&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#39;ref&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #408080; font-style: italic&#34;&gt;# With --warn-undefined-variables, it should warn me&lt;/span&gt;
-run_make_test(&lt;span style=&#34;color: #008000&#34;&gt;undef&lt;/span&gt;, &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;#39;--warn-undefined-variables&amp;#39;&lt;/span&gt;,
-              &lt;span style=&#34;color: #BA2121&#34;&gt;&amp;quot;#MAKEFILE#:7: warning: undefined variable &amp;#39;UNDEFINED&amp;#39;&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;#MAKEFILE#:9: warning: undefined variable &amp;#39;UNDEFINED&amp;#39;&lt;/span&gt;
-&lt;span style=&#34;color: #BA2121&#34;&gt;ref&amp;quot;&lt;/span&gt;);
+&lt;span class=&#34;c1&#34;&gt;# With --warn-undefined-variables, it should warn me&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;run_make_test&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;undef&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#39;--warn-undefined-variables&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+              &lt;span class=&#34;s&#34;&gt;&amp;quot;#MAKEFILE#:7: warning: undefined variable &amp;#39;UNDEFINED&amp;#39;&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;#MAKEFILE#:9: warning: undefined variable &amp;#39;UNDEFINED&amp;#39;&lt;/span&gt;
+&lt;span class=&#34;s&#34;&gt;ref&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 
-&lt;span style=&#34;color: #666666&#34;&gt;1&lt;/span&gt;;
-&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h3 id=&#34;open-issues&#34;&gt;Open issues&lt;/h3&gt;
 
