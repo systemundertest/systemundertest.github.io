@@ -101,7 +101,7 @@ way (testing for /mnt) fails on his machine).
 Some new tests were added.
 &lt;/pre&gt;
 
-&lt;p&gt;This means that &lt;strong&gt;tests in Make were introduced as early as of 1992!&lt;/strong&gt; which is a very good sign given some other tools are likely to not have a good coverage even in present days as described in another article of this series: &lt;a href=&#34;http://lowlevelbits.org/system-under-test-freebsd&#34;&gt;System Under Test: FreeBSD&lt;/a&gt; (see Conclusion there).&lt;/p&gt;
+&lt;p&gt;This means that &lt;strong&gt;tests in Make were introduced as early as of 1992!&lt;/strong&gt; which is a very good sign given some other tools are likely to not have a good coverage even in present days as described in another article of this series: &lt;a href=&#34;http://systemundertest.org/freebsd&#34;&gt;System Under Test: FreeBSD&lt;/a&gt; (see Conclusion there).&lt;/p&gt;
 
 &lt;h4 id=&#34;the-test-suite-requires-perl-and-can-be-run-on-unix-windows-and-dos-systems&#34;&gt;The test suite requires Perl and can be run on UNIX, Windows and DOS systems&lt;/h4&gt;
 
@@ -441,7 +441,7 @@ can impact future tests.&lt;/p&gt;
 &lt;li&gt;There is always space for contribution: more documentation is needed, tests should have better sandboxing to achieve parallelism and removability.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;So far we have Rust and Javascript programming languages, NeoVim editor and XTerm terminal emulator in our plans. Let us know what projects or tools you would like to see covered in this series: &lt;a href=&#34;http://lowlevelbits.org/system-under-test/&#34;&gt;System Under Test&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Let us know what projects or tools you would like to see covered in this series: &lt;a href=&#34;http://systemundertest.org/&#34;&gt;System Under Test&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
     
