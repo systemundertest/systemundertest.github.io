@@ -49,7 +49,7 @@ However there are still parts that do not change very often, that is they are go
 These tests are located in &amp;lsquo;unittests&amp;rsquo; directory.&lt;/p&gt;
 
 &lt;p&gt;They can be run using &lt;code&gt;make&lt;/code&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span&gt;&lt;/span&gt;make check-llvm-unit
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;make check-llvm-unit
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Showing this beautiful output:&lt;/p&gt;
@@ -66,7 +66,7 @@ These tests are located in &amp;lsquo;unittests&amp;rsquo; directory.&lt;/p&gt;
 
 &lt;p&gt;Unit Tests are written using &lt;a href=&#34;https://github.com/google/googletest&#34;&gt;Google Test&lt;/a&gt; framework.
 Here is an example of a simple test:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;// unittests/Support/YAMLParserTest.cpp&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-cpp&#34; data-lang=&#34;cpp&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// unittests/Support/YAMLParserTest.cpp&lt;/span&gt;
 &lt;span class=&#34;n&#34;&gt;TEST&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;YAMLParser&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;SameNodeIteratorOperatorNotEquals&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
   &lt;span class=&#34;n&#34;&gt;SourceMgr&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;SM&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
   &lt;span class=&#34;n&#34;&gt;yaml&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Stream&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Stream&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;[&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\&amp;quot;&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\&amp;quot;&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;, &lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\&amp;quot;&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;se&#34;&gt;\&amp;quot;&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;]&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;SM&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
@@ -92,7 +92,7 @@ Let&amp;rsquo;s move forward and look at another, more interesting group of test
 This test suite located in &lt;code&gt;test&lt;/code&gt; directory.
 It is the largest group of tests used in LLVM. It is 10 times bigger than Unit Tests: ~15k vs ~1,5k.
 It takes about 4 minutes to run on my machine using 4 threads.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span&gt;&lt;/span&gt;make check-llvm
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;make check-llvm
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The output is pretty similar to one above:&lt;/p&gt;
@@ -107,7 +107,7 @@ It takes about 4 minutes to run on my machine using 4 threads.&lt;/p&gt;
 
 &lt;p&gt;Regression Tests (unlike Unit Tests) are using custom tools such as &lt;a href=&#34;http://llvm.org/docs/CommandGuide/lit.html&#34;&gt;lit (LLVM Integrated Tester)&lt;/a&gt; and &lt;a href=&#34;http://llvm.org/docs/CommandGuide/FileCheck.html&#34;&gt;FileCheck&lt;/a&gt;.
 Let&amp;rsquo;s look at simple test to illustrate how it works:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-llvm&#34; data-lang=&#34;llvm&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;; RUN: %lli %s | FileCheck %s&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-llvm&#34; data-lang=&#34;llvm&#34;&gt;&lt;span class=&#34;c&#34;&gt;; RUN: %lli %s | FileCheck %s&lt;/span&gt;
 
 &lt;span class=&#34;vg&#34;&gt;@flt&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;internal&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;global&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;float&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;12.0e+0&lt;/span&gt;
 &lt;span class=&#34;vg&#34;&gt;@str&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;internal&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;constant&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;18&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;i8&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;c&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;Double value: %f\0A\00&amp;quot;&lt;/span&gt;
@@ -130,11 +130,11 @@ Let&amp;rsquo;s look at simple test to illustrate how it works:&lt;/p&gt;
 &lt;p&gt;This test can be split into three parts:&lt;/p&gt;
 
 &lt;p&gt;Run command (the top line):&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-llvm&#34; data-lang=&#34;llvm&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;; RUN: %lli %s | FileCheck %s&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-llvm&#34; data-lang=&#34;llvm&#34;&gt;&lt;span class=&#34;c&#34;&gt;; RUN: %lli %s | FileCheck %s&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Expectations (the bottom line):&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-llvm&#34; data-lang=&#34;llvm&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c&#34;&gt;; CHECK: Double value: 2.0&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-llvm&#34; data-lang=&#34;llvm&#34;&gt;&lt;span class=&#34;c&#34;&gt;; CHECK: Double value: 2.0&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;The rest (LLVM IR in the middle) is the body.&lt;/p&gt;
@@ -142,18 +142,18 @@ Let&amp;rsquo;s look at simple test to illustrate how it works:&lt;/p&gt;
 &lt;p&gt;All tests in this suite have one or more &amp;lsquo;run&amp;rsquo; command.
 &lt;code&gt;lit&lt;/code&gt; uses set of rules to substitute the string into real runnable command. Substitutions are either built-in (such as &lt;code&gt;%s&lt;/code&gt;) or configurable (such as &lt;code&gt;%lli&lt;/code&gt;).
 &lt;code&gt;lit&lt;/code&gt; replaces &lt;code&gt;%s&lt;/code&gt; with the full path to a file under test, e.g.:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span&gt;&lt;/span&gt;~/llvm/test/ExecutionEngine/frem.ll
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;~/llvm/test/ExecutionEngine/frem.ll
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Configurable substitutions however are taken from &lt;code&gt;lit.cfg&lt;/code&gt; file, which is basically a Python script.&lt;/p&gt;
 
 &lt;p&gt;For example, this config says that &lt;code&gt;%lli&lt;/code&gt; is to be replaced with &lt;code&gt;/usr/local/bin/lli&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;lli&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;/usr/local/bin/lli&amp;#39;&lt;/span&gt;
-&lt;span class=&#34;n&#34;&gt;config&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;substitutions&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;append&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;%lli&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;lli&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;n&#34;&gt;lli&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;#39;/usr/local/bin/lli&amp;#39;&lt;/span&gt;
+&lt;span class=&#34;n&#34;&gt;config&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;substitutions&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;append&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#39;%lli&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;lli&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Having these parameters in place &lt;code&gt;lit&lt;/code&gt; will run the test using this command:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span&gt;&lt;/span&gt;/usr/local/bin/lli ~/llvm/test/ExecutionEngine/frem.ll &lt;span class=&#34;p&#34;&gt;|&lt;/span&gt; FileCheck ~/llvm/test/ExecutionEngine/frem.ll
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;/usr/local/bin/lli ~/llvm/test/ExecutionEngine/frem.ll | FileCheck ~/llvm/test/ExecutionEngine/frem.ll
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Which will interpret &lt;code&gt;frem.ll&lt;/code&gt; using LLVM Interpreter (&lt;code&gt;lli&lt;/code&gt;) and pass the output to the &lt;code&gt;FileCheck&lt;/code&gt;. &lt;code&gt;FileCheck&lt;/code&gt; in turn takes two arguments: filename with expectations and input that needs to be examined.&lt;/p&gt;
@@ -187,7 +187,7 @@ As Daniel Dunbar &lt;a href=&#34;https://twitter.com/daniel_dunbar/status/745285
 The tool is so great that it is also used by &lt;a href=&#34;http://llvm.org/docs/LibFuzzer.html#trophies&#34;&gt;other software&lt;/a&gt; such as Python, PCRE, OpenSSL, SQLite, and other.&lt;/p&gt;
 
 &lt;p&gt;Here is an example of a fuzz test:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;// tools/llvm-as-fuzzer/llvm-as-fuzzer.cpp&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// tools/llvm-as-fuzzer/llvm-as-fuzzer.cpp&lt;/span&gt;
 &lt;span class=&#34;k&#34;&gt;extern&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;C&amp;quot;&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;int&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;LLVMFuzzerTestOneInput&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;uint8_t&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Data&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kt&#34;&gt;size_t&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Size&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
 
   &lt;span class=&#34;c1&#34;&gt;// Allocate space for locals before setjmp so that memory can be collected&lt;/span&gt;

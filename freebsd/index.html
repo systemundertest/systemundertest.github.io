@@ -107,7 +107,7 @@
 
 <p>If you are on FreeBSD 10.0 and want to see tests, then you just need to re-build the system from sources.
 Fortunately, it is very easy:</p>
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="nb">echo</span> <span class="s2">&quot;WITH_TESTS=YES&quot;</span> &gt;&gt; /etc/src.conf
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">&quot;WITH_TESTS=YES&quot;</span> &gt;&gt; /etc/src.conf
 <span class="nb">cd</span> /usr/src
 make buildworld
 make installworld
@@ -120,12 +120,12 @@ make installworld
 <p>Initially ATF provided both tools (e.g. test runner, report generator, etc.) and libraries (e.g. test cases, assertions, etc.). Over the years tools from ATF were replaced by Kyua.</p>
 
 <p>To run tests you need to point <code>kyua</code> to a <code>Kyuafile</code>.</p>
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="nb">cd</span> /usr/tests
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> /usr/tests
 kyua <span class="nb">test</span> -k ./Kyuafile
 </code></pre></div>
 
 <p>when it’s done you may request report:</p>
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span>kyua report
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">kyua report
 </code></pre></div>
 
 <p>which shows brief information for all non-succeeded test and a summary, such as this one:</p>
@@ -141,7 +141,7 @@ kyua <span class="nb">test</span> -k ./Kyuafile
 <h4 id="toolchain">Toolchain</h4>
 
 <p><code>Kyuafile</code> specifies which tests to run. It also can include other <code>Kyuafile</code>s. Here is an example:</p>
-<div class="highlight"><pre><code class="language-perl" data-lang="perl"><span></span><span class="n">include</span><span class="p">(</span><span class="s">&#39;lib/Kyuafile&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><code class="language-perl" data-lang="perl"><span class="n">include</span><span class="p">(</span><span class="s">&#39;lib/Kyuafile&#39;</span><span class="p">)</span>
 <span class="n">atf_test_program</span><span class="p">{</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;some_atf_test&#39;</span><span class="p">}</span>
 <span class="n">plain_test_program</span><span class="p">{</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;some_plain_test&#39;</span><span class="p">}</span>
 <span class="n">tap_test_program</span><span class="p">{</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;some_tap_test&#39;</span><span class="p">}</span>
@@ -156,7 +156,7 @@ kyua <span class="nb">test</span> -k ./Kyuafile
 <p>ATF tests intended to be more sophisticated. They may contain several test cases per file and provide useful information besides the exit code. Also, the tests may be written using C, C++ and shell.</p>
 
 <p>Here is a part of an ATF test written in shell:</p>
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="nv">username</span><span class="o">=</span><span class="s2">&quot;test5678901234567&quot;</span>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">username</span><span class="o">=</span><span class="s2">&quot;test5678901234567&quot;</span>
 
 atf_test_case longname cleanup
 
@@ -167,11 +167,11 @@ longname_head<span class="o">()</span> <span class="o">{</span>
 <span class="o">}</span>
 
 longname_body<span class="o">()</span> <span class="o">{</span>
-  atf_check -s exit:0 -o ignore -e ignore -x <span class="s2">&quot;pw useradd </span><span class="nv">$username</span><span class="s2">&quot;</span>
+  atf_check -s <span class="nb">exit</span>:0 -o ignore -e ignore -x <span class="s2">&quot;pw useradd $username&quot;</span>
 <span class="o">}</span>
 
 longname_cleanup<span class="o">()</span> <span class="o">{</span>
-  atf_check -s ignore -o ignore -e ignore -x <span class="s2">&quot;pw userdel </span><span class="nv">$username</span><span class="s2">&quot;</span>
+  atf_check -s ignore -o ignore -e ignore -x <span class="s2">&quot;pw userdel $username&quot;</span>
 <span class="o">}</span>
 
 atf_init_test_cases<span class="o">()</span> <span class="o">{</span>
@@ -183,7 +183,7 @@ atf_init_test_cases<span class="o">()</span> <span class="o">{</span>
 The reason is that FreeBSD tools and libraries usually have their tests source code in their source tree. During installation these tests are compiled and copied to the <code>/usr/tests</code>.
 For example, if you want to see tests for libc’ stdio, then you need to look at <code>/usr/src/lib/libc/tests/stdio</code>.
 At the moment there is one test, here is part of it:</p>
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span></span><span class="n">ATF_TC_WITHOUT_HEAD</span><span class="p">(</span><span class="n">test_append_binary_pos</span><span class="p">);</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">ATF_TC_WITHOUT_HEAD</span><span class="p">(</span><span class="n">test_append_binary_pos</span><span class="p">);</span>
 <span class="n">ATF_TC_BODY</span><span class="p">(</span><span class="n">test_append_binary_pos</span><span class="p">,</span> <span class="n">tc</span><span class="p">)</span>
 <span class="p">{</span>
   <span class="cm">/*</span>
@@ -266,7 +266,7 @@ get any answer so far.</p>
   <footer role="contentinfo">
     <div style="text-align:center;">
       
-      Brought to you by developers
+      Brought to you by curious developers
       <br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
     </div>
   </footer>

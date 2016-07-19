@@ -120,7 +120,7 @@ However there are still parts that do not change very often, that is they are go
 These tests are located in &lsquo;unittests&rsquo; directory.</p>
 
 <p>They can be run using <code>make</code>:</p>
-<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span></span>make check-llvm-unit
+<div class="highlight"><pre><code class="language-sh" data-lang="sh">make check-llvm-unit
 </code></pre></div>
 
 <p>Showing this beautiful output:</p>
@@ -137,7 +137,7 @@ These tests are located in &lsquo;unittests&rsquo; directory.</p>
 
 <p>Unit Tests are written using <a href="https://github.com/google/googletest">Google Test</a> framework.
 Here is an example of a simple test:</p>
-<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span></span><span class="c1">// unittests/Support/YAMLParserTest.cpp</span>
+<div class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="c1">// unittests/Support/YAMLParserTest.cpp</span>
 <span class="n">TEST</span><span class="p">(</span><span class="n">YAMLParser</span><span class="p">,</span> <span class="n">SameNodeIteratorOperatorNotEquals</span><span class="p">)</span> <span class="p">{</span>
   <span class="n">SourceMgr</span> <span class="n">SM</span><span class="p">;</span>
   <span class="n">yaml</span><span class="o">::</span><span class="n">Stream</span> <span class="n">Stream</span><span class="p">(</span><span class="s">&quot;[</span><span class="se">\&quot;</span><span class="s">1</span><span class="se">\&quot;</span><span class="s">, </span><span class="se">\&quot;</span><span class="s">2</span><span class="se">\&quot;</span><span class="s">]&quot;</span><span class="p">,</span> <span class="n">SM</span><span class="p">);</span>
@@ -163,7 +163,7 @@ Let&rsquo;s move forward and look at another, more interesting group of tests.</
 This test suite located in <code>test</code> directory.
 It is the largest group of tests used in LLVM. It is 10 times bigger than Unit Tests: ~15k vs ~1,5k.
 It takes about 4 minutes to run on my machine using 4 threads.</p>
-<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span></span>make check-llvm
+<div class="highlight"><pre><code class="language-sh" data-lang="sh">make check-llvm
 </code></pre></div>
 
 <p>The output is pretty similar to one above:</p>
@@ -178,7 +178,7 @@ It takes about 4 minutes to run on my machine using 4 threads.</p>
 
 <p>Regression Tests (unlike Unit Tests) are using custom tools such as <a href="http://llvm.org/docs/CommandGuide/lit.html">lit (LLVM Integrated Tester)</a> and <a href="http://llvm.org/docs/CommandGuide/FileCheck.html">FileCheck</a>.
 Let&rsquo;s look at simple test to illustrate how it works:</p>
-<div class="highlight"><pre><code class="language-llvm" data-lang="llvm"><span></span><span class="c">; RUN: %lli %s | FileCheck %s</span>
+<div class="highlight"><pre><code class="language-llvm" data-lang="llvm"><span class="c">; RUN: %lli %s | FileCheck %s</span>
 
 <span class="vg">@flt</span> <span class="p">=</span> <span class="k">internal</span> <span class="k">global</span> <span class="kt">float</span> <span class="m">12.0e+0</span>
 <span class="vg">@str</span> <span class="p">=</span> <span class="k">internal</span> <span class="k">constant</span> <span class="p">[</span><span class="m">18</span> <span class="k">x</span> <span class="k">i8</span><span class="p">]</span> <span class="k">c</span><span class="s">&quot;Double value: %f\0A\00&quot;</span>
@@ -201,11 +201,11 @@ Let&rsquo;s look at simple test to illustrate how it works:</p>
 <p>This test can be split into three parts:</p>
 
 <p>Run command (the top line):</p>
-<div class="highlight"><pre><code class="language-llvm" data-lang="llvm"><span></span><span class="c">; RUN: %lli %s | FileCheck %s</span>
+<div class="highlight"><pre><code class="language-llvm" data-lang="llvm"><span class="c">; RUN: %lli %s | FileCheck %s</span>
 </code></pre></div>
 
 <p>Expectations (the bottom line):</p>
-<div class="highlight"><pre><code class="language-llvm" data-lang="llvm"><span></span><span class="c">; CHECK: Double value: 2.0</span>
+<div class="highlight"><pre><code class="language-llvm" data-lang="llvm"><span class="c">; CHECK: Double value: 2.0</span>
 </code></pre></div>
 
 <p>The rest (LLVM IR in the middle) is the body.</p>
@@ -213,18 +213,18 @@ Let&rsquo;s look at simple test to illustrate how it works:</p>
 <p>All tests in this suite have one or more &lsquo;run&rsquo; command.
 <code>lit</code> uses set of rules to substitute the string into real runnable command. Substitutions are either built-in (such as <code>%s</code>) or configurable (such as <code>%lli</code>).
 <code>lit</code> replaces <code>%s</code> with the full path to a file under test, e.g.:</p>
-<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span></span>~/llvm/test/ExecutionEngine/frem.ll
+<div class="highlight"><pre><code class="language-sh" data-lang="sh">~/llvm/test/ExecutionEngine/frem.ll
 </code></pre></div>
 
 <p>Configurable substitutions however are taken from <code>lit.cfg</code> file, which is basically a Python script.</p>
 
 <p>For example, this config says that <code>%lli</code> is to be replaced with <code>/usr/local/bin/lli</code></p>
-<div class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="n">lli</span> <span class="o">=</span> <span class="s1">&#39;/usr/local/bin/lli&#39;</span>
-<span class="n">config</span><span class="o">.</span><span class="n">substitutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;%lli&#39;</span><span class="p">,</span> <span class="n">lli</span> <span class="p">)</span> <span class="p">)</span>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">lli</span> <span class="o">=</span> <span class="s">&#39;/usr/local/bin/lli&#39;</span>
+<span class="n">config</span><span class="o">.</span><span class="n">substitutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="s">&#39;%lli&#39;</span><span class="p">,</span> <span class="n">lli</span> <span class="p">)</span> <span class="p">)</span>
 </code></pre></div>
 
 <p>Having these parameters in place <code>lit</code> will run the test using this command:</p>
-<div class="highlight"><pre><code class="language-sh" data-lang="sh"><span></span>/usr/local/bin/lli ~/llvm/test/ExecutionEngine/frem.ll <span class="p">|</span> FileCheck ~/llvm/test/ExecutionEngine/frem.ll
+<div class="highlight"><pre><code class="language-sh" data-lang="sh">/usr/local/bin/lli ~/llvm/test/ExecutionEngine/frem.ll | FileCheck ~/llvm/test/ExecutionEngine/frem.ll
 </code></pre></div>
 
 <p>Which will interpret <code>frem.ll</code> using LLVM Interpreter (<code>lli</code>) and pass the output to the <code>FileCheck</code>. <code>FileCheck</code> in turn takes two arguments: filename with expectations and input that needs to be examined.</p>
@@ -258,7 +258,7 @@ As Daniel Dunbar <a href="https://twitter.com/daniel_dunbar/status/7452856606264
 The tool is so great that it is also used by <a href="http://llvm.org/docs/LibFuzzer.html#trophies">other software</a> such as Python, PCRE, OpenSSL, SQLite, and other.</p>
 
 <p>Here is an example of a fuzz test:</p>
-<div class="highlight"><pre><code class="language-c" data-lang="c"><span></span><span class="c1">// tools/llvm-as-fuzzer/llvm-as-fuzzer.cpp</span>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="c1">// tools/llvm-as-fuzzer/llvm-as-fuzzer.cpp</span>
 <span class="k">extern</span> <span class="s">&quot;C&quot;</span> <span class="kt">int</span> <span class="n">LLVMFuzzerTestOneInput</span><span class="p">(</span><span class="k">const</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">Data</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">Size</span><span class="p">)</span> <span class="p">{</span>
 
   <span class="c1">// Allocate space for locals before setjmp so that memory can be collected</span>
@@ -356,7 +356,7 @@ There are ~1,5k Unit Tests, ~15k Regression Tests. It takes ~4-5 minutes to run 
   <footer role="contentinfo">
     <div style="text-align:center;">
       
-      Brought to you by developers
+      Brought to you by curious developers
       <br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
     </div>
   </footer>

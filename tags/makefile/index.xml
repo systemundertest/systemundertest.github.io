@@ -184,7 +184,7 @@ $ autoreconf # creates &#39;configure&#39; script
 &lt;/pre&gt;
 
 &lt;p&gt;Then we want to run this newly created script with &lt;code&gt;--prefix&lt;/code&gt; parameter so that it will not install make to the &lt;code&gt;/usr/local/bin&lt;/code&gt; directory but rather to &lt;code&gt;./Build&lt;/code&gt; directory (to not conflict with OSX&amp;rsquo;s Make which we don&amp;rsquo;t want within the scope of this post).&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;$ ./configure --prefix&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;pwd&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/Build
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$ &lt;/span&gt;./configure --prefix&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;pwd&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/Build
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;At this point if you run &lt;code&gt;make&lt;/code&gt; the very first time you will likely see errors about some localization files missing:&lt;/p&gt;
@@ -198,7 +198,7 @@ make: *** [all] Error 2
 &lt;/pre&gt;
 
 &lt;p&gt;To fix that you have to first run (solution found at &lt;a href=&#34;http://gnu-make.2324884.n4.nabble.com/NLS-related-failure-when-building-make-from-CVS-tp2157p2158.html&#34;&gt;GNU Make forums&lt;/a&gt;):&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;make update
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;make update
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Everything should work fine since then, finally we run:&lt;/p&gt;
@@ -227,13 +227,13 @@ $ ./run_make_tests -make ../Build/bin/make
 &lt;/pre&gt;
 
 &lt;p&gt;The results are quite pleasant to look at - &lt;strong&gt;GNU Make built from latest source code on Mac OS X machine, passes all of its tests&lt;/strong&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;581&lt;/span&gt; Tests in &lt;span class=&#34;m&#34;&gt;118&lt;/span&gt; Categories Complete ... No Failures :-&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;581 Tests in 118 Categories Complete ... No Failures :-&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h3 id=&#34;test-case-template&#34;&gt;Test case template&lt;/h3&gt;
 
 &lt;p&gt;The file &lt;code&gt;tests/scripts/test_template&lt;/code&gt; is a generic template, most of the tests are based on it:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
 &lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;FILL IN SHORT DESCRIPTION HERE&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 &lt;span class=&#34;nv&#34;&gt;$details&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;FILL IN DETAILS OF HOW YOU TEST WHAT YOU SAY YOU ARE TESTING&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
@@ -275,7 +275,7 @@ $ ./run_make_tests -make ../Build/bin/make
 &lt;h4 id=&#34;test-case-example-1-simple-functionality-of-make&#34;&gt;Test case example #1: Simple functionality of make&lt;/h4&gt;
 
 &lt;p&gt;The following test is located at &lt;code&gt;tests/scripts/misc/general1&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
 
 &lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;The following test creates a makefile to test the&lt;/span&gt;
@@ -332,7 +332,7 @@ $ ./run_make_tests -make ../Build/bin/make
 &lt;h4 id=&#34;test-case-example-2-phony-targets&#34;&gt;Test case example #2: PHONY targets&lt;/h4&gt;
 
 &lt;p&gt;The following test is located at &lt;code&gt;tests/scripts/targets/PHONY&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
 &lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;The following tests the use of a PHONY target.  It makes\n&amp;quot;&lt;/span&gt;
               &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;sure that the rules under a target get executed even if\n&amp;quot;&lt;/span&gt;
@@ -382,7 +382,7 @@ $ ./run_make_tests -make ../Build/bin/make
 &lt;h4 id=&#34;test-case-example-3-warn-undefined-variables-option&#34;&gt;Test case example #3: &amp;ndash;warn-undefined-variables option&lt;/h4&gt;
 
 &lt;p&gt;The following test is located at &lt;code&gt;tests/scripts/options/warn-undefined-variables&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
 &lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Test the --warn-undefined-variables option.&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 

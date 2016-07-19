@@ -255,7 +255,7 @@ $ autoreconf # creates 'configure' script
 </pre>
 
 <p>Then we want to run this newly created script with <code>--prefix</code> parameter so that it will not install make to the <code>/usr/local/bin</code> directory but rather to <code>./Build</code> directory (to not conflict with OSX&rsquo;s Make which we don&rsquo;t want within the scope of this post).</p>
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span>$ ./configure --prefix<span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/Build
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>./configure --prefix<span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/Build
 </code></pre></div>
 
 <p>At this point if you run <code>make</code> the very first time you will likely see errors about some localization files missing:</p>
@@ -269,7 +269,7 @@ make: *** [all] Error 2
 </pre>
 
 <p>To fix that you have to first run (solution found at <a href="http://gnu-make.2324884.n4.nabble.com/NLS-related-failure-when-building-make-from-CVS-tp2157p2158.html">GNU Make forums</a>):</p>
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span>make update
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">make update
 </code></pre></div>
 
 <p>Everything should work fine since then, finally we run:</p>
@@ -298,13 +298,13 @@ $ ./run_make_tests -make ../Build/bin/make
 </pre>
 
 <p>The results are quite pleasant to look at - <strong>GNU Make built from latest source code on Mac OS X machine, passes all of its tests</strong>:</p>
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span></span><span class="m">581</span> Tests in <span class="m">118</span> Categories Complete ... No Failures :-<span class="o">)</span>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">581 Tests in 118 Categories Complete ... No Failures :-<span class="o">)</span>
 </code></pre></div>
 
 <h3 id="test-case-template">Test case template</h3>
 
 <p>The file <code>tests/scripts/test_template</code> is a generic template, most of the tests are based on it:</p>
-<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span></span><span class="c1">#                                                                    -*-perl-*-</span>
+<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span class="c1">#                                                                    -*-perl-*-</span>
 
 <span class="nv">$description</span> <span class="o">=</span> <span class="s">&quot;&lt;FILL IN SHORT DESCRIPTION HERE&gt;&quot;</span><span class="p">;</span>
 <span class="nv">$details</span> <span class="o">=</span> <span class="s">&quot;&lt;FILL IN DETAILS OF HOW YOU TEST WHAT YOU SAY YOU ARE TESTING&gt;&quot;</span><span class="p">;</span>
@@ -346,7 +346,7 @@ $ ./run_make_tests -make ../Build/bin/make
 <h4 id="test-case-example-1-simple-functionality-of-make">Test case example #1: Simple functionality of make</h4>
 
 <p>The following test is located at <code>tests/scripts/misc/general1</code>.</p>
-<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span></span><span class="c1">#                                                                    -*-perl-*-</span>
+<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span class="c1">#                                                                    -*-perl-*-</span>
 
 
 <span class="nv">$description</span> <span class="o">=</span> <span class="s">&quot;The following test creates a makefile to test the</span>
@@ -403,7 +403,7 @@ $ ./run_make_tests -make ../Build/bin/make
 <h4 id="test-case-example-2-phony-targets">Test case example #2: PHONY targets</h4>
 
 <p>The following test is located at <code>tests/scripts/targets/PHONY</code>.</p>
-<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span></span><span class="c1">#                                                                    -*-perl-*-</span>
+<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span class="c1">#                                                                    -*-perl-*-</span>
 
 <span class="nv">$description</span> <span class="o">=</span> <span class="s">&quot;The following tests the use of a PHONY target.  It makes\n&quot;</span>
               <span class="o">.</span><span class="s">&quot;sure that the rules under a target get executed even if\n&quot;</span>
@@ -453,7 +453,7 @@ $ ./run_make_tests -make ../Build/bin/make
 <h4 id="test-case-example-3-warn-undefined-variables-option">Test case example #3: &ndash;warn-undefined-variables option</h4>
 
 <p>The following test is located at <code>tests/scripts/options/warn-undefined-variables</code>.</p>
-<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span></span><span class="c1">#                                                                    -*-perl-*-</span>
+<div class="highlight"><pre><code class="language-pl" data-lang="pl"><span class="c1">#                                                                    -*-perl-*-</span>
 
 <span class="nv">$description</span> <span class="o">=</span> <span class="s">&quot;Test the --warn-undefined-variables option.&quot;</span><span class="p">;</span>
 
@@ -551,7 +551,7 @@ can impact future tests.</p>
   <footer role="contentinfo">
     <div style="text-align:center;">
       
-      Brought to you by developers
+      Brought to you by curious developers
       <br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
     </div>
   </footer>

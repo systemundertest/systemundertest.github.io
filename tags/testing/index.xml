@@ -184,7 +184,7 @@ $ autoreconf # creates &#39;configure&#39; script
 &lt;/pre&gt;
 
 &lt;p&gt;Then we want to run this newly created script with &lt;code&gt;--prefix&lt;/code&gt; parameter so that it will not install make to the &lt;code&gt;/usr/local/bin&lt;/code&gt; directory but rather to &lt;code&gt;./Build&lt;/code&gt; directory (to not conflict with OSX&amp;rsquo;s Make which we don&amp;rsquo;t want within the scope of this post).&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;$ ./configure --prefix&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;pwd&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/Build
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;nv&#34;&gt;$ &lt;/span&gt;./configure --prefix&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;pwd&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/Build
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;At this point if you run &lt;code&gt;make&lt;/code&gt; the very first time you will likely see errors about some localization files missing:&lt;/p&gt;
@@ -198,7 +198,7 @@ make: *** [all] Error 2
 &lt;/pre&gt;
 
 &lt;p&gt;To fix that you have to first run (solution found at &lt;a href=&#34;http://gnu-make.2324884.n4.nabble.com/NLS-related-failure-when-building-make-from-CVS-tp2157p2158.html&#34;&gt;GNU Make forums&lt;/a&gt;):&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;make update
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;make update
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Everything should work fine since then, finally we run:&lt;/p&gt;
@@ -227,13 +227,13 @@ $ ./run_make_tests -make ../Build/bin/make
 &lt;/pre&gt;
 
 &lt;p&gt;The results are quite pleasant to look at - &lt;strong&gt;GNU Make built from latest source code on Mac OS X machine, passes all of its tests&lt;/strong&gt;:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;581&lt;/span&gt; Tests in &lt;span class=&#34;m&#34;&gt;118&lt;/span&gt; Categories Complete ... No Failures :-&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;581 Tests in 118 Categories Complete ... No Failures :-&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h3 id=&#34;test-case-template&#34;&gt;Test case template&lt;/h3&gt;
 
 &lt;p&gt;The file &lt;code&gt;tests/scripts/test_template&lt;/code&gt; is a generic template, most of the tests are based on it:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
 &lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;FILL IN SHORT DESCRIPTION HERE&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 &lt;span class=&#34;nv&#34;&gt;$details&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;&amp;lt;FILL IN DETAILS OF HOW YOU TEST WHAT YOU SAY YOU ARE TESTING&amp;gt;&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
@@ -275,7 +275,7 @@ $ ./run_make_tests -make ../Build/bin/make
 &lt;h4 id=&#34;test-case-example-1-simple-functionality-of-make&#34;&gt;Test case example #1: Simple functionality of make&lt;/h4&gt;
 
 &lt;p&gt;The following test is located at &lt;code&gt;tests/scripts/misc/general1&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
 
 &lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;The following test creates a makefile to test the&lt;/span&gt;
@@ -332,7 +332,7 @@ $ ./run_make_tests -make ../Build/bin/make
 &lt;h4 id=&#34;test-case-example-2-phony-targets&#34;&gt;Test case example #2: PHONY targets&lt;/h4&gt;
 
 &lt;p&gt;The following test is located at &lt;code&gt;tests/scripts/targets/PHONY&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
 &lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;The following tests the use of a PHONY target.  It makes\n&amp;quot;&lt;/span&gt;
               &lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;sure that the rules under a target get executed even if\n&amp;quot;&lt;/span&gt;
@@ -382,7 +382,7 @@ $ ./run_make_tests -make ../Build/bin/make
 &lt;h4 id=&#34;test-case-example-3-warn-undefined-variables-option&#34;&gt;Test case example #3: &amp;ndash;warn-undefined-variables option&lt;/h4&gt;
 
 &lt;p&gt;The following test is located at &lt;code&gt;tests/scripts/options/warn-undefined-variables&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-pl&#34; data-lang=&#34;pl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;#                                                                    -*-perl-*-&lt;/span&gt;
 
 &lt;span class=&#34;nv&#34;&gt;$description&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;Test the --warn-undefined-variables option.&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
 
@@ -472,7 +472,7 @@ can impact future tests.&lt;/p&gt;
 
 &lt;p&gt;If you are on FreeBSD 10.0 and want to see tests, then you just need to re-build the system from sources.
 Fortunately, it is very easy:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;quot;WITH_TESTS=YES&amp;quot;&lt;/span&gt; &amp;gt;&amp;gt; /etc/src.conf
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;nb&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;quot;WITH_TESTS=YES&amp;quot;&lt;/span&gt; &amp;gt;&amp;gt; /etc/src.conf
 &lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; /usr/src
 make buildworld
 make installworld
@@ -485,12 +485,12 @@ make installworld
 &lt;p&gt;Initially ATF provided both tools (e.g. test runner, report generator, etc.) and libraries (e.g. test cases, assertions, etc.). Over the years tools from ATF were replaced by Kyua.&lt;/p&gt;
 
 &lt;p&gt;To run tests you need to point &lt;code&gt;kyua&lt;/code&gt; to a &lt;code&gt;Kyuafile&lt;/code&gt;.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; /usr/tests
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;nb&#34;&gt;cd&lt;/span&gt; /usr/tests
 kyua &lt;span class=&#34;nb&#34;&gt;test&lt;/span&gt; -k ./Kyuafile
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;when it’s done you may request report:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;kyua report
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;kyua report
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;which shows brief information for all non-succeeded test and a summary, such as this one:&lt;/p&gt;
@@ -506,7 +506,7 @@ kyua &lt;span class=&#34;nb&#34;&gt;test&lt;/span&gt; -k ./Kyuafile
 &lt;h4 id=&#34;toolchain&#34;&gt;Toolchain&lt;/h4&gt;
 
 &lt;p&gt;&lt;code&gt;Kyuafile&lt;/code&gt; specifies which tests to run. It also can include other &lt;code&gt;Kyuafile&lt;/code&gt;s. Here is an example:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-perl&#34; data-lang=&#34;perl&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;include&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#39;lib/Kyuafile&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-perl&#34; data-lang=&#34;perl&#34;&gt;&lt;span class=&#34;n&#34;&gt;include&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#39;lib/Kyuafile&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;span class=&#34;n&#34;&gt;atf_test_program&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#39;some_atf_test&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;span class=&#34;n&#34;&gt;plain_test_program&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#39;some_plain_test&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;span class=&#34;n&#34;&gt;tap_test_program&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#39;some_tap_test&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
@@ -521,7 +521,7 @@ kyua &lt;span class=&#34;nb&#34;&gt;test&lt;/span&gt; -k ./Kyuafile
 &lt;p&gt;ATF tests intended to be more sophisticated. They may contain several test cases per file and provide useful information besides the exit code. Also, the tests may be written using C, C++ and shell.&lt;/p&gt;
 
 &lt;p&gt;Here is a part of an ATF test written in shell:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;username&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;quot;test5678901234567&amp;quot;&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;nv&#34;&gt;username&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;quot;test5678901234567&amp;quot;&lt;/span&gt;
 
 atf_test_case longname cleanup
 
@@ -532,11 +532,11 @@ longname_head&lt;span class=&#34;o&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o
 &lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;
 
 longname_body&lt;span class=&#34;o&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;
-  atf_check -s exit:0 -o ignore -e ignore -x &lt;span class=&#34;s2&#34;&gt;&amp;quot;pw useradd &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$username&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;quot;&lt;/span&gt;
+  atf_check -s &lt;span class=&#34;nb&#34;&gt;exit&lt;/span&gt;:0 -o ignore -e ignore -x &lt;span class=&#34;s2&#34;&gt;&amp;quot;pw useradd $username&amp;quot;&lt;/span&gt;
 &lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;
 
 longname_cleanup&lt;span class=&#34;o&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;
-  atf_check -s ignore -o ignore -e ignore -x &lt;span class=&#34;s2&#34;&gt;&amp;quot;pw userdel &lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$username&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;quot;&lt;/span&gt;
+  atf_check -s ignore -o ignore -e ignore -x &lt;span class=&#34;s2&#34;&gt;&amp;quot;pw userdel $username&amp;quot;&lt;/span&gt;
 &lt;span class=&#34;o&#34;&gt;}&lt;/span&gt;
 
 atf_init_test_cases&lt;span class=&#34;o&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;{&lt;/span&gt;
@@ -548,7 +548,7 @@ atf_init_test_cases&lt;span class=&#34;o&#34;&gt;()&lt;/span&gt; &lt;span class=
 The reason is that FreeBSD tools and libraries usually have their tests source code in their source tree. During installation these tests are compiled and copied to the &lt;code&gt;/usr/tests&lt;/code&gt;.
 For example, if you want to see tests for libc’ stdio, then you need to look at &lt;code&gt;/usr/src/lib/libc/tests/stdio&lt;/code&gt;.
 At the moment there is one test, here is part of it:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span&gt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;ATF_TC_WITHOUT_HEAD&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;test_append_binary_pos&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span class=&#34;n&#34;&gt;ATF_TC_WITHOUT_HEAD&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;test_append_binary_pos&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
 &lt;span class=&#34;n&#34;&gt;ATF_TC_BODY&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;test_append_binary_pos&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;tc&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
 &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
   &lt;span class=&#34;cm&#34;&gt;/*&lt;/span&gt;
