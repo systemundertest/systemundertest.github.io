@@ -1,5 +1,6 @@
 User-agent: *
 Disallow:
 Disallow: /draft/
+Disallow: /interview/
 
 Sitemap: http://systemundertest.org/sitemap.xml

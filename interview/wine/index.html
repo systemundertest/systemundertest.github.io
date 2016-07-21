@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  
+  <meta charset="UTF-8">
+
+  <title>
+    Wine | System Under Test
+  </title>
+
+
+  
+  <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1,initial-scale=1">
+
+  
+  <link rel="canonical" href="http://systemundertest.org/interview/wine/"/>
+
+  
+  <link rel="stylesheet" href="/css/sanitize.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  
+  <link rel="stylesheet" href="/css/syntax.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/custom.css">
+  
+  
+  <link href="http://systemundertest.org/index.xml" rel="alternate" type="application/rss+xml" title="System Under Test" />
+  <link href="http://systemundertest.org/index.xml" rel="feed" type="application/rss+xml" title="System Under Test" />
+
+  
+  
+
+  
+    <meta name="keywords" content="wine,testing,interview" />
+  
+
+  
+    <meta name="description" content="An interview with Alexandre Julliard, maintainer of Wine" />
+  
+ 
+
+</head>
+
+
+
+<body>
+<div class="container">
+
+  
+  <header role="banner">
+    <div class="row gutters">
+      <div id="site-title" class="col span_6">
+        <h1><a href="http://systemundertest.org/">System Under Test</a></h1>
+        <h2>How Software is Tested</h2>
+      </div>
+      <div id="social" class="col span_6">
+        <ul>
+          <li><a href="https://twitter.com/systemundertest" target="_blank">Twitter</a></li>
+          <li><a href="http://systemundertest.org/index.xml" type="application/rss+xml" target="_blank">RSS</a></li>
+          <li><a href="http://systemundertest.org//about">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+
+  
+  <main id="single" role="main">
+    <div class="article-header">
+      <h1>Wine</h1>
+          <div class="meta">
+      Sep 23, 2014 &nbsp;
+      
+        #<a href="/categories/interview">Interview</a>&nbsp;
+      
+
+    </div>
+    <div class="meta">
+      
+      by @<a href="https://twitter.com/estet" target="_blank">ligurio</a>&nbsp;
+      
+    </div>
+
+
+    </div>
+    <article>
+      
+
+<p><a href="https://www.winehq.org/about/">Wine</a> — is a free software that gives a capability to run 16-, 32-, and 64-bit Microsoft Windows applications on UNIX-like systems. Its name is a recursive acronym, which stands for &ldquo;Wine Is Not Emulator&rdquo;.</p>
+
+<p>Maintainer of the project Alexandre Julliard kindly answered my questions regarding development and testing of Wine.</p>
+
+<p><strong>Please introduce yourself.</strong></p>
+
+<p>I’ve been the maintainer of the Wine project for the past 20 years. Surprisingly, I still enjoy doing it ;-) In my daytime job, I’m CTO of CodeWeavers.</p>
+
+<p><strong>How much developers involved in development? How development process of Wine looks like?</strong></p>
+
+<p>There are probably around 30-40 active developers at any given time, though of course people come and go regularly. Similarly to the Linux kernel, we use the benevolent dictator model, so I’m the only one with commit access to the main tree.</p>
+
+<p><strong>How testing process looks like?</strong></p>
+
+<p>We have automated unit tests for most of the code, that are run on every change. For application testing, we have a large user community that complains loudly everytime we break their favorite application ;-)</p>
+
+<p><strong>What tools, tests and testing frameworks do you use?</strong></p>
+
+<p>There is an extensive unit testing framework in the Wine tree, which we developed ourselves. Basically it consists of a set of small programs that exercise features of the Windows APIs and check the results. By running the tests both on Wine and on actual Windows sytems, we can make sure that Wine is compatible with all the quirks of the corresponding Windows APIs.</p>
+
+<p>Test runs are submitted to a central server that gathers statistics of results across plaforms and across code revisions. Results can be seen at <a href="https://test.winehq.org">https://test.winehq.org</a>.</p>
+
+<p>We also have a tesbot system (<a href="https://testbot.winehq.org">https://testbot.winehq.org</a>) that allows developers to submit new tests and have them run across a range of Windows systems, since it’s not possible for every developer to have access to every Windows version locally.</p>
+
+<p><strong>I know Wine project has a tool ‘wineoops’ for gathering crash statistics. How it works and how it helps in development?</strong></p>
+
+<p>It’s a very experimental tool, we don’t really use it all that much. The idea is that it would crawl the web looking for crash reports, to allow us to spot common crashes and solve them in priority. But it only works well for specific categories of crashes, like unimplemented functions, that have a well-known crash signature. Otherwise we mostly rely on individual bug reports to gather crash logs.</p>
+
+<p><strong>Do you create tests to cover new features and found bugs?</strong></p>
+
+<p>Most changes come with their own test, to prove that the change conforms to the Windows behavior. The Windows APIs often behave in mysterious ways, so I usually require tests even for changes that look straightforward.</p>
+
+<p><strong>What kind of testing do you use (performance, functional, compatibility, stability, unit testing etc)? Is it automated testing or manual testing?</strong></p>
+
+<p>Unit testing is all automated. The unit test suite is run daily on Windows, and after every commit on Wine, and any discrepancy indicates a bug. It’s all compatibility and functional testing, we don’t do performance testing at the unit level.</p>
+
+<p>Application testing is done manually by users. Any regression is reported, and once bisected it’s logged into the regression tracker (aka Hall of Shame) at <a href="https://source.winehq.org/regressions">https://source.winehq.org/regressions</a>.</p>
+
+<p><strong>Do you use negative testing techniques (like fuzz testing, fault injection etc)?</strong></p>
+
+<p>Not explicitly, but running actual Windows applications is actually a pretty good exercise in negative testing. Windows applications very often pass wrong info or outright garbage to our APIs. There is a lot of very bad code out there…</p>
+
+<p><strong>Do you measure code coverage? How often?</strong></p>
+
+<p>Code coverage isn’t very meaningful in our case. Since the tests are meant to exercise Windows APIs, we would need to measure the coverage of our test suite against the Windows code, which of course we don’t have access to.</p>
+
+<p><strong>Do you use Continuous Integration in development process?</strong></p>
+
+<p>Yes, all proposed changes are run automatically run through the test suite by the Testbot server. The full suite is also run before the patches become part of the mainline tree. Once they have passed the tests, updates to the mainline are made available once a day.</p>
+
+<p><strong>Do you involve volunteers to testing? I mean thing like ‘crowd sourcing’.</strong></p>
+
+<p>For application testing, yes, it’s all done by users. There’s no way that Wine developers could possibly test the thousands of Windows applications out there, but the users community is very large and provides good coverage of most applications.</p>
+
+<p><strong>Let’s imagine someone wants to help with testing. How to start?</strong></p>
+
+<p>The best way is to find an application that interests you, test it regularly and report any problems. In particular, doing a git bisect when a new problem is found is extremely helpful.</p>
+
+<p><strong>What tool do you use for tracking open bugs? Who is responsible in tracking of open bugs?</strong></p>
+
+<p>We use Bugzilla (<a href="https://bugs.winehq.org">https://bugs.winehq.org</a>). It’s managed by volunteers from our community. We have a good team of bugzilla volunteers who do a great job of massaging the bug reports to make them useful for developers. This is especially important since in most cases developers do not have access to the original Windows application, so they cannot reproduce the bug themselves.</p>
+
+<p><strong>Do you use regular security audit of code?</strong></p>
+
+<p>No, we haven’t really focused on security at this point. Our view is that since the goal of Wine is to run arbitrary Windows code anyway, security is better enforced outside of it, i.e. with Unix user separation and permissions, various sandbox mechanisms, etc.</p>
+
+<p><strong>Do you use static or dynamic code analysis tools or services like Coverity? Or maybe another techniques directed to improving quality of code?</strong></p>
+
+<p>We use Coverity and Valgrind extensively, as well as other diagnostic tools. There’s over a thousand fixes in our code base that are directly attributable to code analysis tools.</p>
+
+<p><strong>Who is responsible for releasing of new version? What are the release criterias?</strong></p>
+
+<p>Development snapshots are released every two weeks. These are only snapshots so there are no release criteria.</p>
+
+<p>Stable releases happen every year or two. The criteria are mostly that there is some interesting new feature, with as few regressions as possible (ideally zero, but that’s usually not realistic). I’m responsible for making the releases.</p>
+
+<p><strong>What was the most interesting bug in your practice? :)</strong></p>
+
+<p>The most interesting bugs usually happen in the applications. Wine is actually a very good tool for finding bugs in Windows applications ;-)</p>
+
+<p>I fondly remember the bug where an application would start crashing once the tick counter returned a negative number. It’s a 32-bit milliseconds counter, so that would happen after about 25 days of uptime. This was in the Windows 95 days, so of course there was no such thing as a Windows box with 25 days of uptime, so the crash only happened on Wine ;-)</p>
+
+<h3 id="more-information-on-wine-testing">More information on Wine testing</h3>
+
+<ul>
+<li>&ldquo;wineoops – A statistical approach to Wine crashes&rdquo; <a href="http://people.redhat.com/mstefani/wineoops/wineoops-wineconf2009.pdf">PDF</a> <a href="http://www.archive.org/download/Wineconf2009/stefaniucwineoops2009.ogv">OGV</a></li>
+<li>&ldquo;WineTestBot - A Wine gatekeeper and test farm for Wine developers&rdquo; <a href="https://wiki.winehq.org/images/6/6c/WineConf2013-WTB.pdf">PDF</a></li>
+</ul>
+
+
+      
+      
+    </article>
+    
+ <aside><div id="disqus_thread"></div></aside>
+
+<script type="text/javascript">
+
+     
+    var disqus_shortname = 'systemundertest';
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+  </main>
+
+  <nav class="pagination-single">
+    
+    
+  </nav>
+
+
+  
+  <footer role="contentinfo">
+    <div style="text-align:center;">
+      
+      Brought to you by curious developers
+      <br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+    </div>
+  </footer>
+
+
+</div>
+
+
+
+
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-80371307-1', 'auto');
+	ga('send', 'pageview');
+</script>
+
+</body>
+</html>
+
+
