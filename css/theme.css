@@ -162,10 +162,10 @@ nav.pagination-single a {
   color: #29abe2;
 }
 #single aside {
-  margin-top: 80px;
+  margin-top: 20px;
 }
 footer {
-  margin: 80px 0;
+  margin: 40px 0;
   padding: 20px 0;
 }
 footer img {
@@ -238,3 +238,26 @@ article #share-this {
   color: #999;
   font-size: 12px;
 }
+
+.relevant-articles {
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.relevant-articles-header {
+  padding-top: 10px;
+  margin-top: 20px;
+}
+
+.relevant-article-summary {
+  color: #999;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.share {
+  padding-top: 10px;
+  margin-top: 20px;
+}
+
