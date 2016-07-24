@@ -6,7 +6,7 @@
     <description>Recent content on System Under Test</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 13 Jul 2016 07:37:18 +0200</lastBuildDate>
+    <lastBuildDate>Sun, 24 Jul 2016 16:40:00 +0100</lastBuildDate>
     <atom:link href="http://systemundertest.org/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
@@ -19,7 +19,7 @@
 
 &lt;h3 id=&#34;introduction&#34;&gt;Introduction&lt;/h3&gt;
 
-&lt;p&gt;&lt;strong&gt;Disclaimer:&lt;/strong&gt; the author of this post is not involved into a development of GNU Make project. All of the following is merely a high-level report about what a curious developer can see from looking at the GNU Make&amp;rsquo;s sources. The author didn&amp;rsquo;t go very deep into the topic, could overlook something etc. Having that said, we always appreciate feedback from our colleagues who have advanced experience with the projects we write about, especially from the developers and maintainers.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Disclaimer:&lt;/strong&gt; the author of this post is not involved into a development of GNU Make project. All of the following is merely a high-level report about what a curious developer can see from looking at GNU Make&amp;rsquo;s source code. The author didn&amp;rsquo;t go very deep into the topic, could overlook something etc. Having that said, we always appreciate feedback from our colleagues who have advanced experience with the projects we write about, especially from the developers and maintainers.&lt;/p&gt;
 
 &lt;h3 id=&#34;getting-gnu-make-s-sources&#34;&gt;Getting GNU Make&amp;rsquo;s sources&lt;/h3&gt;
 

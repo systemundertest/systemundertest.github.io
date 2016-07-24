@@ -1,0 +1,17 @@
+.spoiler-collapsed:before {
+   content: "▹ ";
+}
+
+.spoiler-expanded:before {
+   content: "▿ ";
+}
+
+.spoiler-control {
+  color: #29abe2;
+}
+
+.spoiler-content {
+  display: none;
+  height:auto;
+  overflow:auto;
+}
