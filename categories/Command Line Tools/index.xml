@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>command-line-tools on System Under Test</title>
+    <link>https://systemundertest.org/categories/command-line-tools/index.xml</link>
+    <description>Recent content in command-line-tools on System Under Test</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Brought to you by curious developers</copyright>
+    <atom:link href="/categories/command-line-tools/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>XTerm</title>
+      <link>https://systemundertest.org/xterm/</link>
+      <pubDate>Thu, 28 Jul 2016 05:34:00 +0100</pubDate>
+      
+      <guid>https://systemundertest.org/xterm/</guid>
+      <description>
+
+&lt;style&gt;
+
+article img {
+    box-shadow: 1px 1px 6px #ccc;
+    width:      100%;
+    height:     auto;
+    display:    block;
+    margin:     20px auto;
+}
+
+article img.inline-50perc {
+    float:left;
+    box-shadow: 1px 1px 6px #ccc;
+    width:      360px;
+    height:     auto;
+    display:    block;
+    margin:     10px 20px;
+    margin-left: 0;
+}
+
+&lt;/style&gt;
+
+&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+
+&lt;p&gt;This post is written for &amp;ldquo;System Under Test&amp;rdquo; blog and is a research on how XTerm project is tested.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Disclaimer:&lt;/strong&gt; the author of this post is not involved into a development of XTerm project. All of the following is merely a high-level report about what a curious developer can see from looking at XTerm&amp;rsquo;s source code. The author didn&amp;rsquo;t go very deep into the topic, could overlook something etc. Having that said, we always appreciate feedback from our colleagues who have advanced experience with the projects we write about, especially from the developers and maintainers.&lt;/p&gt;
+
+&lt;h2 id=&#34;what-is-the-project-about&#34;&gt;What is the project about?&lt;/h2&gt;
+
+&lt;p&gt;The project&amp;rsquo;s home page is located at: &lt;a href=&#34;http://invisible-island.net/xterm/&#34;&gt;http://invisible-island.net/xterm/&lt;/a&gt;, here is the description from Wikipedia:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;xterm is the standard terminal emulator for the X Window System.&lt;/p&gt;
+
+&lt;p&gt;xterm originated prior to the X Window System. It was originally written as a stand-alone terminal emulator for the VAXStation 100 (VS100) by Mark Vandevoorde, a student of Jim Gettys, in the summer of 1984, when work on X started. It rapidly became clear that it would be more useful as part of X than as a standalone program, so it was retargeted to X.&lt;/p&gt;
+
+&lt;p&gt;After many years as part of the X reference implementation, around 1996 the main line of development then shifted to XFree86 (which itself forked from X11R6.3), and it is now actively maintained by Thomas Dickey.&lt;/p&gt;
+
+&lt;p&gt;Many xterm variants are also available. Most terminal emulators for X started as variations on xterm.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Xterm&#34;&gt;https://en.wikipedia.org/wiki/Xterm&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;We will look at three projects: XTerm, &lt;a href=&#34;http://invisible-island.net/vttest/vttest.html&#34;&gt;Vttest&lt;/a&gt; tool and so-called &lt;a href=&#34;http://invisible-island.net/ncurses/ncurses-examples.html#synopsis&#34;&gt;ncurses test programs&lt;/a&gt;. The maintainer of all of these projects is &lt;a href=&#34;http://invisible-island.net/&#34;&gt;Thomas E. Dickey&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;what-is-tested-in-xterm&#34;&gt;What is tested in XTerm?&lt;/h2&gt;
+
+&lt;p&gt;Using frontend-backend terminology, we may think of a terminal emulator (like XTerm or OS X Terminal) as a frontend that communicates with a backend, which is operating system, with a middleware in between: shell (like bash or zsh).&lt;/p&gt;
+
+&lt;p&gt;Historically, the protocols for this communication between terminal&amp;rsquo;s frontend and backend evolved around usage of &lt;a href=&#34;https://en.wikipedia.org/wiki/ANSI_escape_code&#34;&gt;ANSI escape codes&lt;/a&gt;, and were eventually standardized in ECMA-48/ISO 6429/ANSI X3.64 standards. The first popular video terminal to support these codes was the Digital VT100, introduced in 1978 (&lt;a href=&#34;https://en.wikipedia.org/wiki/ANSI_escape_code&#34;&gt;https://en.wikipedia.org/wiki/ANSI_escape_code&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;Ability to correctly recognize and handle sufficiently large number of escape codes is a crucial part of implementation of any terminal. For example, to make &lt;code&gt;Vim&lt;/code&gt;, &lt;code&gt;man&lt;/code&gt; or command-line editing work correctly, one has to implement escape controls that are required for these programs, otherwise terminal emulator will produce malformed output (or crash).&lt;/p&gt;
+
+&lt;p&gt;&lt;i&gt;The following example demonstrates what terminal emulator (frontend) receives from operating system (backend), after you type &lt;code&gt;vi&lt;/code&gt; and then press &amp;ldquo;Enter&amp;rdquo; in OS X Terminal. Terminal emulator has to interpret these codes and react on them accordingly.&lt;/i&gt;&lt;/p&gt;
+
+
+&lt;div class=&#34;spoiler-collapsed&#34;&gt;
+  &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;How Vim is rendered&lt;/a&gt;
+  &lt;div class=&#34;spoiler-content&#34;&gt;
+    
+&lt;img class=&#34;inline-50perc&#34; src=&#34;https://systemundertest.org/img/sut_xterm/terminal_vim_log.png&#34;/&gt;
+&lt;img class=&#34;inline-50perc&#34; src=&#34;https://systemundertest.org/img/sut_xterm/terminal_vim.png&#34;/&gt;
+&lt;i&gt;In a real world, ESC character (ASCII decimal 27/hex 0x1B/octal 033) is not printable. It is manually substituted in the log trace (left image) to be human-readable as &#34;ESC&#34;.&lt;/i&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;p&gt;One of the key features of XTerm is that it supports most of the control sequences ever available for terminal emulators:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;XTerm provides DEC VT102/VT220 and selected features from higher-level terminals such as VT320/VT420/VT520 (VTxxx). It also provides Tektronix 4014 emulation for programs that cannot use the window system directly.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://invisible-island.net/xterm/xterm.faq.html#what_is_it&#34;&gt;http://invisible-island.net/xterm/xterm.faq.html#what_is_it&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;According to &lt;a href=&#34;http://invisible-island.net/xterm/xterm.faq.html#compare_versions&#34;&gt;Comparing versions, by counting controls&lt;/a&gt;, XTerm implements at least twice as many of escape codes as any of well-known terminals: rxvt, putty, konsole, vte and some others, and at this point one may really wonder how all of this functionality is tested by XTerm&amp;rsquo;s developer.&lt;/p&gt;
+
+&lt;h2 id=&#34;getting-started&#34;&gt;Getting started&lt;/h2&gt;
+
+&lt;h3 id=&#34;getting-xterm&#34;&gt;Getting XTerm&lt;/h3&gt;
+
+&lt;p&gt;If you want to run XTerm on Mac OS X, you have to have &lt;a href=&#34;https://www.xquartz.org/&#34;&gt;XQuartz&lt;/a&gt; installed.&lt;/p&gt;
+
+&lt;p&gt;The source code is available on &lt;a href=&#34;http://invisible-island.net/xterm/#download&#34;&gt;project&amp;rsquo;s page, Download section&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;wget ftp://invisible-island.net/xterm/xterm.tar.gz
+tar xzvf xterm.tar.gz
+cd xterm-325
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;./configure --prefix=$(pwd)/Build/ --enable-trace
+make
+make install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;to run xterm:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;./Build/bin/xterm
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Passing &lt;code&gt;--enable-trace&lt;/code&gt; enables tracing functions: when you run &lt;code&gt;xterm&lt;/code&gt; two files are created: &lt;code&gt;Trace-child.out&lt;/code&gt; and &lt;code&gt;Trace-parent.out&lt;/code&gt;, where &lt;code&gt;xterm&lt;/code&gt; writes debug information. Enabling this flag is not relevant for this post, but can be interesting for someone who wants to look behind the scenes and see what information is relevant to a developer of XTerm.&lt;/p&gt;
+
+&lt;h3 id=&#34;getting-vttest&#34;&gt;Getting Vttest&lt;/h3&gt;
+
+&lt;p&gt;Vttest&amp;rsquo;s source code is located at: &lt;a href=&#34;http://invisible-island.net/vttest/:&#34;&gt;http://invisible-island.net/vttest/:&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;wget ftp://invisible-island.net/vttest/vttest.tar.gz
+tar xzvf vttest.tar.gz
+cd vttest-20140305
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;./configure --prefix=$(pwd)/Build
+make
+make install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;to run:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;./Build/bin/vttest
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;getting-ncurses-test-programs&#34;&gt;Getting ncurses test programs&lt;/h3&gt;
+
+&lt;p&gt;From &lt;a href=&#34;http://invisible-island.net/ncurses/ncurses-examples.html:&#34;&gt;http://invisible-island.net/ncurses/ncurses-examples.html:&lt;/a&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;wget ftp://invisible-island.net/ncurses-examples/current/ncurses-examples.tar.gz
+tar xzvf ncurses-examples.tar.gz
+cd ncurses-examples-20160709
+./configure
+make
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;3-groups-of-tests&#34;&gt;3 groups of tests&lt;/h2&gt;
+
+&lt;p&gt;Exploration of &lt;code&gt;XTerm&lt;/code&gt;, &lt;code&gt;vttest&lt;/code&gt; and &lt;code&gt;ncurses test programs&lt;/code&gt; reveals three corresponding groups of tests:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;vttests/*&lt;/code&gt; in XTerm&amp;rsquo;s source tree: test scripts written in Perl and Bash&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;vttest&lt;/code&gt; program&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ncurses test programs&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;These groups are independent from each other however they all share the same approach:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;All three groups are visual and manual tests.&lt;/strong&gt; This means that to verify them, developer has to run these tests (including tests inside &lt;code&gt;vttest&lt;/code&gt; program) manually and look for discrepancies between expected visual output and real visual output produced by terminal emulator that is under test.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;All of these tests have to be run from inside terminal emulator that is being tested.&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;xterm-vttests&#34;&gt;XTerm/vttests/*&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;$ ls -l
+-rwxr-xr-x@ 1 Stanislaw  staff  3434 Dec 11  2011 16colors.sh
+-rwxr-xr-x@ 1 Stanislaw  staff  2083 Feb 26  2014 256colors.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  5043 Feb 26  2014 256colors2.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  1947 Feb 26  2014 88colors.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  5105 Feb 26  2014 88colors2.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  3118 Dec 11  2011 8colors.sh
+-rwxr-xr-x@ 1 Stanislaw  staff  2942 Dec 11  2011 acolors.sh
+-rwxr-xr-x@ 1 Stanislaw  staff  3429 Dec 11  2011 doublechars.sh
+-rwxr-xr-x@ 1 Stanislaw  staff  3412 Feb 26  2014 dynamic.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  2711 Dec 11  2011 dynamic.sh
+-rwxr-xr-x@ 1 Stanislaw  staff  3359 Dec 11  2011 dynamic2.sh
+-rwxr-xr-x@ 1 Stanislaw  staff  2661 Aug 10  2015 fonts.sh
+-rwxr-xr-x@ 1 Stanislaw  staff  4841 Dec 28  2014 paste64.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  4313 Feb 26  2014 query-color.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  4713 Feb 26  2014 query-fonts.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  3669 Oct  7  2014 resize.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  3203 Dec 11  2011 resize.sh
+-rwxr-xr-x@ 1 Stanislaw  staff  8263 Feb 26  2014 tcapquery.pl
+-rwxr-xr-x@ 1 Stanislaw  staff  2850 Dec 11  2011 title.sh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;example-vttests-colors16-sh&#34;&gt;Example: ./vttests/colors16.sh&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/xterm_vttests_001_Colors16.gif&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;example-vttests-dynamic2-sh&#34;&gt;Example: ./vttests/dynamic2.sh&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/xterm_vttests_002_Dynamic2.gif&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;example-vttests-resize-sh&#34;&gt;Example: ./vttests/resize.sh&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/xterm_vttests_003_Resize.gif&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;vttest&#34;&gt;Vttest&lt;/h2&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Vttest tests the compatibility (demonstrates the non-compatibility) of so-called &amp;ldquo;VT100-compatible&amp;rdquo; terminals.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://invisible-island.net/vttest/vttest.html&#34;&gt;http://invisible-island.net/vttest/vttest.html&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Vttest is an application which is used to demonstrate features of VT100 and related terminals, or emulations thereof, such as xterm. The program was originally written in 1986 by Per Lindberg. It has been maintained and extended since 1996 by Thomas Dickey, to test and demonstrate features of xterm.
+&lt;a href=&#34;https://en.wikipedia.org/wiki/Vttest&#34;&gt;https://en.wikipedia.org/wiki/Vttest&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This program should be run inside a terminal program under test.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_001_welcome.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+
+&lt;p&gt;I have run &lt;code&gt;vttest&lt;/code&gt; in three terminals: XTerm, &lt;a href=&#34;http://www.apple.com/osx/apps/&#34;&gt;Terminal.app&lt;/a&gt; (default terminal of OS X) and &lt;a href=&#34;https://github.com/gnachman/iTerm2&#34;&gt;iTerm2&lt;/a&gt; (well-known open-source terminal emulator for OS X).&lt;/p&gt;
+
+&lt;p&gt;On the following screenshots XTerm has white background - it always demonstrates correct expected behavior in &lt;code&gt;vttest&lt;/code&gt;. Terminal.app and iTerm2 have black background and sometimes diverge from expected by the test cases, they are hidden by default and can be expanded.&lt;/p&gt;
+
+&lt;h3 id=&#34;example-cursor-movements&#34;&gt;Example: cursor movements&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_002_screen_should_be_cleared_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+
+&lt;p&gt;
+&lt;div class=&#34;spoiler-collapsed&#34;&gt;
+  &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;Terminal.app&lt;/a&gt;
+  &lt;div class=&#34;spoiler-content&#34;&gt;
+    
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_002_screen_should_be_cleared_nsterm.png&#34; width=&#34;760&#34;/&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;div class=&#34;spoiler-collapsed&#34;&gt;
+  &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;iTerm2&lt;/a&gt;
+  &lt;div class=&#34;spoiler-content&#34;&gt;
+    
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_002_screen_should_be_cleared_iterm2.png&#34; width=&#34;760&#34;/&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/p&gt;
+
+&lt;h3 id=&#34;example-autowrap-mixing-control-and-print-characters&#34;&gt;Example: autowrap, mixing control and print characters.&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_003_autowrap_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+
+&lt;p&gt;
+&lt;div class=&#34;spoiler-collapsed&#34;&gt;
+  &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;Terminal.app&lt;/a&gt;
+  &lt;div class=&#34;spoiler-content&#34;&gt;
+    
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_003_autowrap_nsterm.png&#34; width=&#34;760&#34;/&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;div class=&#34;spoiler-collapsed&#34;&gt;
+  &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;iTerm2&lt;/a&gt;
+  &lt;div class=&#34;spoiler-content&#34;&gt;
+    
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_003_autowrap_iterm2.png&#34; width=&#34;760&#34;/&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/p&gt;
+
+&lt;h3 id=&#34;example-wrap-around-mode-setting&#34;&gt;Example: WRAP AROUND mode setting&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_004_wrap_around_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+
+&lt;p&gt;
+&lt;div class=&#34;spoiler-collapsed&#34;&gt;
+  &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;Terminal.app&lt;/a&gt;
+  &lt;div class=&#34;spoiler-content&#34;&gt;
+    
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_004_wrap_around_nsterm.png&#34; width=&#34;760&#34;/&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;div class=&#34;spoiler-collapsed&#34;&gt;
+  &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;iTerm2&lt;/a&gt;
+  &lt;div class=&#34;spoiler-content&#34;&gt;
+    
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_004_wrap_around_iterm2.png&#34; width=&#34;760&#34;/&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/p&gt;
+
+&lt;h3 id=&#34;example-origin-mode-test&#34;&gt;Example: origin mode test&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_005_origin_mode_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+
+&lt;p&gt;
+&lt;div class=&#34;spoiler-collapsed&#34;&gt;
+  &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;Terminal.app&lt;/a&gt;
+  &lt;div class=&#34;spoiler-content&#34;&gt;
+    
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_005_origin_mode_nsterm.png&#34; width=&#34;760&#34;/&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+
+&lt;div class=&#34;spoiler-collapsed&#34;&gt;
+  &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;iTerm2&lt;/a&gt;
+  &lt;div class=&#34;spoiler-content&#34;&gt;
+    
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_005_origin_mode_iterm2.png&#34; width=&#34;760&#34;/&gt;
+
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;/p&gt;
+
+&lt;h2 id=&#34;ncurses-test-programs&#34;&gt;ncurses test programs&lt;/h2&gt;
+
+&lt;p&gt;ncurses test programs are part of &lt;a href=&#34;http://invisible-island.net/ncurses/&#34;&gt;ncurses&lt;/a&gt; source tree. However, they have a separate project page: &lt;a href=&#34;http://invisible-island.net/ncurses/ncurses-examples.html&#34;&gt;ncurses test programs&lt;/a&gt; and can be also obtained in a separate tar.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;The ncurses test programs are used both for testing/demonstrating features of ncurses, as well as for occasional comparisons with other curses implementations.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;To understand what is tested here is definition of ncurses:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;ncurses (new curses) is a programming library providing an application programming interface (API) that allows the programmer to write text-based user interfaces in a terminal-independent manner. It is a toolkit for developing &amp;ldquo;GUI-like&amp;rdquo; application software that runs under a terminal emulator. It also optimizes screen changes, in order to reduce the latency experienced when using remote shells.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Strictly speaking, System Under Test for these programs is &lt;code&gt;ncurses&lt;/code&gt;, not &lt;code&gt;XTerm&lt;/code&gt;, however running these programs from a terminal-emulator-under-test can give a large amount of additional testing information for &lt;code&gt;XTerm&lt;/code&gt; especially because the maintainer of both &lt;code&gt;ncurses&lt;/code&gt; and &lt;code&gt;XTerm&lt;/code&gt; is the same person.&lt;/p&gt;
+
+&lt;p&gt;Excerpt from README:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;The programs in this directory are used to test and demonstrate ncurses.
+Some are interesting in themselves, while others merely show how some of
+the library calls are used.  Some date back to the initial releases of
+ncurses during the mid-1990s, such as:
+
+    blue       - Blue Moon, a nifty solitaire (uses color)
+    bs.c       - the game of Battleships (uses color)
+    firework.c - multi-colored fireworks (uses color)
+    gdc.c      - Great Digital Clock (uses color)
+    hanoi.c    - the game of hanoi (uses color essentially)
+    knight.c   - the game of Knight&#39;s Tour (uses color)
+    lrtest.c   - test of access to the lower-right corner
+    ncurses.c  - multi-test program (uses color)
+    newdemo.c  - another test from PDCurses (uses color)
+    rain.c     - rain drops keep falling on my head...
+    tclock.c   - analog/digital clock
+    testcurs.c - a test from the PDCurses people (uses color)
+    tracemunch - Perl script to make trace scripts easier to read
+    worm.c     - worms run all over your screen (uses color)
+    xmas.c     - Xmas greeting card
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;example-worm&#34;&gt;Example: Worm&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/ncurses-test-programs-001-worm.gif&#34;/&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;example-great-digital-clock&#34;&gt;Example: Great digital clock&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/ncurses-test-programs-002-gdc.gif&#34;/&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;example-xmas-greeting-card&#34;&gt;Example: Xmas greeting card&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/ncurses-test-programs-003-xmas.gif&#34;/&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;XTerm has 3 groups of tests:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Perl/bash test scripts in XTerm&amp;rsquo;s tree&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Vttest&lt;/code&gt; program&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ncurses test programs&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code&gt;Vttest&lt;/code&gt; and &lt;code&gt;ncurses test programs&lt;/code&gt; can be used to test any terminal emulator, however their main system-under-test is XTerm.&lt;/p&gt;
+
+&lt;p&gt;All of 3 test groups are &lt;strong&gt;manual&lt;/strong&gt;, &lt;strong&gt;visual&lt;/strong&gt; tests that have to be run from terminal emulator which is under test. Developer has to run these tests manually to compare expected visual output with actual visual output and look for discrepancies.&lt;/p&gt;
+
+&lt;h2 id=&#34;more-about-testing-in-system-under-test-blog&#34;&gt;More about testing in System Under Test blog&lt;/h2&gt;
+
+&lt;p&gt;If you want to see some tool or project covered in this blog, or if you want to contribute a post about some tool or project - let us know: &lt;a href=&#34;mailto:contact@systemundertest.org&#34;&gt;contact@systemundertest.org&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

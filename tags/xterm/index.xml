@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>System Under Test</title>
-    <link>http://systemundertest.org/tags/xterm/index.xml</link>
-    <description>Recent content on System Under Test</description>
+    <title>xterm on System Under Test</title>
+    <link>https://systemundertest.org/tags/xterm/index.xml</link>
+    <description>Recent content in xterm on System Under Test</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Brought to you by curious developers</copyright>
@@ -11,10 +11,10 @@
     
     <item>
       <title>XTerm</title>
-      <link>http://systemundertest.org/xterm/</link>
+      <link>https://systemundertest.org/xterm/</link>
       <pubDate>Thu, 28 Jul 2016 05:34:00 +0100</pubDate>
       
-      <guid>http://systemundertest.org/xterm/</guid>
+      <guid>https://systemundertest.org/xterm/</guid>
       <description>
 
 &lt;style&gt;
@@ -78,8 +78,8 @@ article img.inline-50perc {
   &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;How Vim is rendered&lt;/a&gt;
   &lt;div class=&#34;spoiler-content&#34;&gt;
     
-&lt;img class=&#34;inline-50perc&#34; src=&#34;http://systemundertest.org/img/sut_xterm/terminal_vim_log.png&#34;/&gt;
-&lt;img class=&#34;inline-50perc&#34; src=&#34;http://systemundertest.org/img/sut_xterm/terminal_vim.png&#34;/&gt;
+&lt;img class=&#34;inline-50perc&#34; src=&#34;https://systemundertest.org/img/sut_xterm/terminal_vim_log.png&#34;/&gt;
+&lt;img class=&#34;inline-50perc&#34; src=&#34;https://systemundertest.org/img/sut_xterm/terminal_vim.png&#34;/&gt;
 &lt;i&gt;In a real world, ESC character (ASCII decimal 27/hex 0x1B/octal 033) is not printable. It is manually substituted in the log trace (left image) to be human-readable as &#34;ESC&#34;.&lt;/i&gt;
 
   &lt;/div&gt;
@@ -195,15 +195,15 @@ make
 
 &lt;h3 id=&#34;example-vttests-colors16-sh&#34;&gt;Example: ./vttests/colors16.sh&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/xterm_vttests_001_Colors16.gif&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/xterm_vttests_001_Colors16.gif&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;example-vttests-dynamic2-sh&#34;&gt;Example: ./vttests/dynamic2.sh&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/xterm_vttests_002_Dynamic2.gif&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/xterm_vttests_002_Dynamic2.gif&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;example-vttests-resize-sh&#34;&gt;Example: ./vttests/resize.sh&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/xterm_vttests_003_Resize.gif&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/xterm_vttests_003_Resize.gif&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;vttest&#34;&gt;Vttest&lt;/h2&gt;
 
@@ -218,7 +218,7 @@ make
 
 &lt;p&gt;This program should be run inside a terminal program under test.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_001_welcome.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_001_welcome.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
 
 &lt;p&gt;I have run &lt;code&gt;vttest&lt;/code&gt; in three terminals: XTerm, &lt;a href=&#34;http://www.apple.com/osx/apps/&#34;&gt;Terminal.app&lt;/a&gt; (default terminal of OS X) and &lt;a href=&#34;https://github.com/gnachman/iTerm2&#34;&gt;iTerm2&lt;/a&gt; (well-known open-source terminal emulator for OS X).&lt;/p&gt;
 
@@ -226,14 +226,14 @@ make
 
 &lt;h3 id=&#34;example-cursor-movements&#34;&gt;Example: cursor movements&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_002_screen_should_be_cleared_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_002_screen_should_be_cleared_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
 
 &lt;p&gt;
 &lt;div class=&#34;spoiler-collapsed&#34;&gt;
   &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;Terminal.app&lt;/a&gt;
   &lt;div class=&#34;spoiler-content&#34;&gt;
     
-    &lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_002_screen_should_be_cleared_nsterm.png&#34; width=&#34;760&#34;/&gt;
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_002_screen_should_be_cleared_nsterm.png&#34; width=&#34;760&#34;/&gt;
 
   &lt;/div&gt;
 &lt;/div&gt;
@@ -244,7 +244,7 @@ make
   &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;iTerm2&lt;/a&gt;
   &lt;div class=&#34;spoiler-content&#34;&gt;
     
-    &lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_002_screen_should_be_cleared_iterm2.png&#34; width=&#34;760&#34;/&gt;
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_002_screen_should_be_cleared_iterm2.png&#34; width=&#34;760&#34;/&gt;
 
   &lt;/div&gt;
 &lt;/div&gt;
@@ -253,14 +253,14 @@ make
 
 &lt;h3 id=&#34;example-autowrap-mixing-control-and-print-characters&#34;&gt;Example: autowrap, mixing control and print characters.&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_003_autowrap_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_003_autowrap_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
 
 &lt;p&gt;
 &lt;div class=&#34;spoiler-collapsed&#34;&gt;
   &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;Terminal.app&lt;/a&gt;
   &lt;div class=&#34;spoiler-content&#34;&gt;
     
-    &lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_003_autowrap_nsterm.png&#34; width=&#34;760&#34;/&gt;
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_003_autowrap_nsterm.png&#34; width=&#34;760&#34;/&gt;
 
   &lt;/div&gt;
 &lt;/div&gt;
@@ -271,7 +271,7 @@ make
   &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;iTerm2&lt;/a&gt;
   &lt;div class=&#34;spoiler-content&#34;&gt;
     
-    &lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_003_autowrap_iterm2.png&#34; width=&#34;760&#34;/&gt;
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_003_autowrap_iterm2.png&#34; width=&#34;760&#34;/&gt;
 
   &lt;/div&gt;
 &lt;/div&gt;
@@ -280,14 +280,14 @@ make
 
 &lt;h3 id=&#34;example-wrap-around-mode-setting&#34;&gt;Example: WRAP AROUND mode setting&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_004_wrap_around_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_004_wrap_around_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
 
 &lt;p&gt;
 &lt;div class=&#34;spoiler-collapsed&#34;&gt;
   &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;Terminal.app&lt;/a&gt;
   &lt;div class=&#34;spoiler-content&#34;&gt;
     
-    &lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_004_wrap_around_nsterm.png&#34; width=&#34;760&#34;/&gt;
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_004_wrap_around_nsterm.png&#34; width=&#34;760&#34;/&gt;
 
   &lt;/div&gt;
 &lt;/div&gt;
@@ -298,7 +298,7 @@ make
   &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;iTerm2&lt;/a&gt;
   &lt;div class=&#34;spoiler-content&#34;&gt;
     
-    &lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_004_wrap_around_iterm2.png&#34; width=&#34;760&#34;/&gt;
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_004_wrap_around_iterm2.png&#34; width=&#34;760&#34;/&gt;
 
   &lt;/div&gt;
 &lt;/div&gt;
@@ -307,14 +307,14 @@ make
 
 &lt;h3 id=&#34;example-origin-mode-test&#34;&gt;Example: origin mode test&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_005_origin_mode_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_005_origin_mode_xterm.png&#34; width=&#34;760&#34;/&gt;&lt;/p&gt;
 
 &lt;p&gt;
 &lt;div class=&#34;spoiler-collapsed&#34;&gt;
   &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;Terminal.app&lt;/a&gt;
   &lt;div class=&#34;spoiler-content&#34;&gt;
     
-    &lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_005_origin_mode_nsterm.png&#34; width=&#34;760&#34;/&gt;
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_005_origin_mode_nsterm.png&#34; width=&#34;760&#34;/&gt;
 
   &lt;/div&gt;
 &lt;/div&gt;
@@ -325,7 +325,7 @@ make
   &lt;a href=&#34;&#34; class=&#34;spoiler-control&#34; onclick=&#34;showSpoiler(this); return false;&#34;&gt;iTerm2&lt;/a&gt;
   &lt;div class=&#34;spoiler-content&#34;&gt;
     
-    &lt;img src=&#34;http://systemundertest.org/img/sut_xterm/vttest_005_origin_mode_iterm2.png&#34; width=&#34;760&#34;/&gt;
+    &lt;img src=&#34;https://systemundertest.org/img/sut_xterm/vttest_005_origin_mode_iterm2.png&#34; width=&#34;760&#34;/&gt;
 
   &lt;/div&gt;
 &lt;/div&gt;
@@ -374,15 +374,15 @@ ncurses during the mid-1990s, such as:
 
 &lt;h3 id=&#34;example-worm&#34;&gt;Example: Worm&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/ncurses-test-programs-001-worm.gif&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/ncurses-test-programs-001-worm.gif&#34;/&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;example-great-digital-clock&#34;&gt;Example: Great digital clock&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/ncurses-test-programs-002-gdc.gif&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/ncurses-test-programs-002-gdc.gif&#34;/&gt;&lt;/p&gt;
 
 &lt;h3 id=&#34;example-xmas-greeting-card&#34;&gt;Example: Xmas greeting card&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_xterm/ncurses-test-programs-003-xmas.gif&#34;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_xterm/ncurses-test-programs-003-xmas.gif&#34;/&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h2&gt;
 

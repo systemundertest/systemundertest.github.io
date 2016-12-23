@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>System Under Test</title>
-    <link>http://systemundertest.org/tags/llvm/index.xml</link>
-    <description>Recent content on System Under Test</description>
+    <title>llvm on System Under Test</title>
+    <link>https://systemundertest.org/tags/llvm/index.xml</link>
+    <description>Recent content in llvm on System Under Test</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Brought to you by curious developers</copyright>
@@ -11,10 +11,10 @@
     
     <item>
       <title>LLVM</title>
-      <link>http://systemundertest.org/llvm/</link>
+      <link>https://systemundertest.org/llvm/</link>
       <pubDate>Thu, 24 Mar 2016 23:18:29 +0100</pubDate>
       
-      <guid>http://systemundertest.org/llvm/</guid>
+      <guid>https://systemundertest.org/llvm/</guid>
       <description>
 
 &lt;h3 id=&#34;what-is-llvm-about&#34;&gt;What is LLVM about?&lt;/h3&gt;
@@ -54,7 +54,7 @@ These tests are located in &amp;lsquo;unittests&amp;rsquo; directory.&lt;/p&gt;
 
 &lt;p&gt;Showing this beautiful output:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_llvm/unit_tests.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_llvm/unit_tests.png&#34;
   style=&#34; display: block;
           margin-left: auto;
           margin-right: auto;
@@ -97,7 +97,7 @@ It takes about 4 minutes to run on my machine using 4 threads.&lt;/p&gt;
 
 &lt;p&gt;The output is pretty similar to one above:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_llvm/regression_tests.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_llvm/regression_tests.png&#34;
   style=&#34; display: block;
           margin-left: auto;
           margin-right: auto;

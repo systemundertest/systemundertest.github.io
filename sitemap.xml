@@ -2,43 +2,204 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://systemundertest.org/</loc>
+    <loc>https://systemundertest.org/xterm/</loc>
     <lastmod>2016-07-28T05:34:00+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://systemundertest.org/xterm/</loc>
-    <lastmod>2016-07-28T05:34:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://systemundertest.org/draft/ocaml/</loc>
+    <loc>https://systemundertest.org/draft/ocaml/</loc>
     <lastmod>2016-07-13T07:37:18+02:00</lastmod>
   </url>
   
   <url>
-    <loc>http://systemundertest.org/about/</loc>
+    <loc>https://systemundertest.org/about/</loc>
     <lastmod>2016-07-11T20:18:29+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://systemundertest.org/gnu-make/</loc>
+    <loc>https://systemundertest.org/gnu-make/</loc>
     <lastmod>2016-06-12T21:05:00+02:00</lastmod>
   </url>
   
   <url>
-    <loc>http://systemundertest.org/freebsd/</loc>
+    <loc>https://systemundertest.org/freebsd/</loc>
     <lastmod>2016-03-31T17:22:59+02:00</lastmod>
   </url>
   
   <url>
-    <loc>http://systemundertest.org/llvm/</loc>
+    <loc>https://systemundertest.org/llvm/</loc>
     <lastmod>2016-03-24T23:18:29+01:00</lastmod>
   </url>
   
   <url>
-    <loc>http://systemundertest.org/interview/wine/</loc>
+    <loc>https://systemundertest.org/interview/wine/</loc>
     <lastmod>2014-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/draft/</loc>
+    <lastmod>2016-07-13T07:37:18+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/interview/</loc>
+    <lastmod>2014-09-23T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/post/</loc>
+    <lastmod>2016-07-28T05:34:00+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/</loc>
+    <lastmod>2016-07-28T05:34:00+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/categories/build-tools/</loc>
+    <lastmod>2016-06-12T21:05:00+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/categories/command-line-tools/</loc>
+    <lastmod>2016-07-28T05:34:00+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/categories/compilers/</loc>
+    <lastmod>2016-07-13T07:37:18+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/freebsd/</loc>
+    <lastmod>2016-03-31T17:22:59+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/fuzz-testing/</loc>
+    <lastmod>2016-03-24T23:18:29+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/gnu-make/</loc>
+    <lastmod>2016-07-13T07:37:18+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/interview/</loc>
+    <lastmod>2014-09-23T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/categories/interview/</loc>
+    <lastmod>2014-09-23T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/llvm/</loc>
+    <lastmod>2016-03-24T23:18:29+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/make/</loc>
+    <lastmod>2016-06-12T21:05:00+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/makefile/</loc>
+    <lastmod>2016-07-13T07:37:18+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/ocaml/</loc>
+    <lastmod>2016-07-13T07:37:18+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/categories/operating-systems/</loc>
+    <lastmod>2016-03-31T17:22:59+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/performance-testing/</loc>
+    <lastmod>2016-03-24T23:18:29+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/regression-testing/</loc>
+    <lastmod>2016-03-24T23:18:29+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/tap/</loc>
+    <lastmod>2016-03-31T17:22:59+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/test/</loc>
+    <lastmod>2016-07-28T05:34:00+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/testing/</loc>
+    <lastmod>2016-07-28T05:34:00+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/tests/</loc>
+    <lastmod>2016-07-13T07:37:18+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/unit-testing/</loc>
+    <lastmod>2016-07-13T07:37:18+02:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/wine/</loc>
+    <lastmod>2014-09-23T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://systemundertest.org/tags/xterm/</loc>
+    <lastmod>2016-07-28T05:34:00+01:00</lastmod>
+    <priority>0</priority>
   </url>
   
 </urlset>

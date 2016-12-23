@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>System Under Test</title>
-    <link>http://systemundertest.org/tags/make/index.xml</link>
-    <description>Recent content on System Under Test</description>
+    <title>make on System Under Test</title>
+    <link>https://systemundertest.org/tags/make/index.xml</link>
+    <description>Recent content in make on System Under Test</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Brought to you by curious developers</copyright>
@@ -11,10 +11,10 @@
     
     <item>
       <title>GNU Make</title>
-      <link>http://systemundertest.org/gnu-make/</link>
+      <link>https://systemundertest.org/gnu-make/</link>
       <pubDate>Sun, 12 Jun 2016 21:05:00 +0200</pubDate>
       
-      <guid>http://systemundertest.org/gnu-make/</guid>
+      <guid>https://systemundertest.org/gnu-make/</guid>
       <description>
 
 &lt;h3 id=&#34;introduction&#34;&gt;Introduction&lt;/h3&gt;
