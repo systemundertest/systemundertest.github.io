@@ -1,20 +1,1129 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>System Under Test</title>
-    <link>http://systemundertest.org/tags/regression-testing/index.xml</link>
-    <description>Recent content on System Under Test</description>
+    <title>Regression testing on System Under Test</title>
+    <link>https://systemundertest.org/tags/regression-testing/</link>
+    <description>Recent content in Regression testing on System Under Test</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Brought to you by curious developers</copyright>
-    <atom:link href="/tags/regression-testing/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 10 Jul 2017 08:00:00 +0100</lastBuildDate>
+    <atom:link href="/tags/regression-testing/" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Rust</title>
+      <link>https://systemundertest.org/rust/</link>
+      <pubDate>Mon, 10 Jul 2017 08:00:00 +0100</pubDate>
+      
+      <guid>https://systemundertest.org/rust/</guid>
+      <description>
+
+&lt;p&gt;&lt;em&gt;This is a cross-post from &lt;a href=&#34;https://brson.github.io&#34;&gt;Brian Anderson&amp;rsquo;s blog&lt;/a&gt;. Original post is &lt;a href=&#34;https://brson.github.io/2017/07/10/how-rust-is-tested&#34;&gt;here&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Rust is a systems programming language with massive ambitions. It is
+designed for creating the most reliable software, from the tiniest
+embedded systems to multi-million line behemoths, and its users need
+to have confidence that it is fit for purpose.&lt;/p&gt;
+
+&lt;p&gt;In service of this ambition Rust has an extremely thorough testing
+regimen, and that is one of the things I am most proud of about Rust.
+Rust has a strict continuous integration system that runs a great
+number of tests on every pull request, basically guaranteeing that the
+Rust master branch always works; which is crucial because Rust
+releases nightly builds every night, and stable builds every six
+weeks. And Rust further tests every release against its entire open
+source library ecosystem.&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;ve always admired well-tested software projects, like &lt;a href=&#34;https://sqlite.org/testing.html&#34;&gt;SQLite&lt;/a&gt;, and
+aim to place Rust among the pantheon of the best. This document then,
+is a catalog of all the ways we test Rust. I hope it provides insight
+into what it takes to deliver a production-quality programming
+language, a hint at the wide variety of techniques employed in
+software validation, and that it reinforces your confidence in Rust&amp;rsquo;s
+reliability.&lt;/p&gt;
+
+&lt;h2 id=&#34;summary-2017-07-10&#34;&gt;Summary (2017/07/10)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;All patches built in 58 configurations before landing&lt;/li&gt;
+&lt;li&gt;All patches tested in 20 configurations before landing&lt;/li&gt;
+&lt;li&gt;126k tests per PR across all platforms&lt;/li&gt;
+&lt;li&gt;Full release artifacts published for 48 platforms every merge&lt;/li&gt;
+&lt;li&gt;Testing of all documentation&lt;/li&gt;
+&lt;li&gt;Releases every six weeks&lt;/li&gt;
+&lt;li&gt;13k Rust projects regression-tested before releases&lt;/li&gt;
+&lt;li&gt;222k tests in Rust projects tested before releases&lt;/li&gt;
+&lt;li&gt;Fuzz testing and formal verification&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;contents&#34;&gt;Contents&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#s-pr&#34;&gt;The promise of Rust&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-ci&#34;&gt;Continuous integration&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-cr&#34;&gt;Continuous releases&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-ts&#34;&gt;The Rust test suite&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#s-ut&#34;&gt;Unit tests&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-ct&#34;&gt;compiletest&lt;/a&gt; - The Rust test suite test driver&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-rpf&#34;&gt;run-pass and run-fail&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-cf&#34;&gt;compile-fail&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-ui&#34;&gt;ui&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-rm&#34;&gt;run-make&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-cg&#34;&gt;codegen&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-cgu&#34;&gt;codegen-units&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-p&#34;&gt;pretty&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-dbg&#34;&gt;debuginfo&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-inc&#34;&gt;incremental&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-mir&#34;&gt;mir-opt&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-rd&#34;&gt;rustdoc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-doc&#34;&gt;documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-link&#34;&gt;linkchecker&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-crt&#34;&gt;cargotest&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-err&#34;&gt;check-error-index&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-dist&#34;&gt;distcheck&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-tidy&#34;&gt;tidy&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-boot&#34;&gt;bootstrap&lt;/a&gt; - Build system self-check&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-tools&#34;&gt;tools&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-ot&#34;&gt;Other testing&lt;/a&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#s-ds&#34;&gt;cargobomb and crater&lt;/a&gt; - Downstream testing&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-libc&#34;&gt;libc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-cb&#34;&gt;compiler-builtins&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-perf&#34;&gt;perf.rust-lang.org&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-fuzz&#34;&gt;fuzzing&lt;/a&gt; - afl.rs and cargo-fuzz&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-icci&#34;&gt;rust-icci&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-fx&#34;&gt;Firefox beta testing&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-form&#34;&gt;Formal verification&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-smoke&#34;&gt;smoke&lt;/a&gt; - Cross-platform testing&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-ru&#34;&gt;rustup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-clippy&#34;&gt;clippy&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#s-f&#34;&gt;Notes and future work&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-pr&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;the-promise-of-rust&#34;&gt;The promise of Rust&lt;/h2&gt;
+
+&lt;p&gt;Rust is a systems programming language with massive ambitions. It is
+designed for creating the most reliable software, from the tiniest
+embedded systems to multi-million line behemoths, and its users need
+to have confidence that it is fit for purpose.&lt;/p&gt;
+
+&lt;p&gt;Today Rust runs on &lt;a href=&#34;https://forge.rust-lang.org/platform-support.html&#34;&gt;many platforms&lt;/a&gt;, and tomorrow it will run on many
+more. Rust will one day run on any machine with a microprocessor.&lt;/p&gt;
+
+&lt;p&gt;And Rust moves fast, with &lt;a href=&#34;https://github.com/rust-lang/rfcs/blob/master/text/0507-release-channels.md&#34;&gt;releases every 6 weeks&lt;/a&gt;, and a growing
+ecosystem of software depending on it. Rust makes &lt;a href=&#34;https://blog.rust-lang.org/2014/10/30/Stability.html&#34;&gt;strong guarantees&lt;/a&gt;
+about compatibility and stability, what will, won&amp;rsquo;t, and might break
+as the plattform evolves, and ensuring that we fulfill those
+guarantees is crucial to maintaining the trust of Rust&amp;rsquo;s users.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s a big challenge to keep it all from falling apart. This is how we
+do it.&lt;/p&gt;
+
+&lt;p&gt;We use strong &lt;em&gt;continuous integration&lt;/em&gt; to catch many bugs before they
+are ever committed to the Rust repository, and &lt;em&gt;continuous releases&lt;/em&gt;
+to enable more extensive testing of nightly and beta builds prior to
+the release every 6 weeks.&lt;/p&gt;
+
+&lt;p&gt;During CI, all patches must pass the Rust test suite in all supported
+configurations before landing. Nightly and beta releases are subject
+to further testing using a number of techniques.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-ci&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;continuous-integration&#34;&gt;Continuous integration&lt;/h2&gt;
+
+&lt;p&gt;Rust relies on &lt;a href=&#34;https://en.wikipedia.org/wiki/Continuous_integration&#34;&gt;continuous integration&lt;/a&gt;, where the code base is tested
+as part of the process of reviewing and merging patches.&lt;/p&gt;
+
+&lt;p&gt;In Rust we do CI in a very particular way, and one which we are very
+proud of. Rust&amp;rsquo;s creator, Graydon, originally described it in a blog
+post, &lt;a href=&#34;http://graydon2.dreamwidth.org/1597.html&#34;&gt;&amp;ldquo;The Not Rocket Science Rule&amp;rdquo;&lt;/a&gt;. The thing we do
+differently from most is that we run the full test suite against every
+patch, as if it were merged to master, &lt;em&gt;before&lt;/em&gt; committing it into the
+master branch, whereas most CI setups test &lt;em&gt;after&lt;/em&gt; committing, or if
+they do run tests against every PR, they do so before merging, leaving
+open the possibility of regressions introduced during the merge.&lt;/p&gt;
+
+&lt;p&gt;How does this work precisely? Our integration bot, &lt;a href=&#34;https://github.com/bors&#34;&gt;bors&lt;/a&gt;, maintains a
+&lt;a href=&#34;https://buildbot2.rust-lang.org/homu/queue/rust&#34;&gt;queue of all pull requests&lt;/a&gt; that have been reviewed and
+approved for landing. It proceeds through this queue, one at a time:
+for each pull request it merges the pull request branch with the
+master branch, but into a temporary branch (which we call &amp;ldquo;auto&amp;rdquo;);
+then it runs the entire test suite on that branch, in many
+configurations (as of 2017/07/10 there are 59 configurations built,
+and 20 tested). If all tests pass in all configurations only then does
+that commit become the master branch. Then bors moves onto the next
+PR.&lt;/p&gt;
+
+&lt;p&gt;The important things to recognize about this arrangement are: first,
+the head commit on Rust&amp;rsquo;s master branch is guaranteed to be fully
+tested at all times; but as a consequence, landing pull requests to
+Rust is completely serialized - only one PR can be under final testing
+at a time.&lt;/p&gt;
+
+&lt;p&gt;The benefit of this arrangement is that Rust&amp;rsquo;s developers have high
+confidence that the master branch works correctly, always. It isn&amp;rsquo;t
+perfect - bugs do slip through - but it does provide significant peace
+of mind.&lt;/p&gt;
+
+&lt;p&gt;There&amp;rsquo;s a big downside though in that landing patches to Rust is
+serialized on running the test suite on every patch, and it takes a
+particularly long time to Run the Rust test suite in all the
+configurations we care about. Today the longest-running configuration
+takes over 2 hours. Rust always has a queue of approved patches
+waiting to land, and so it can take days for even simple patches to
+get through the queue.&lt;/p&gt;
+
+&lt;p&gt;This can create an interesting competitive environment where authors
+desire high spots in the queue and complain when the queue grows.&lt;/p&gt;
+
+&lt;p&gt;While PR authors are waiting in bors&amp;rsquo;s queue, we also have a bot
+test their PR in a single configuration as a smoke test. This avoids
+the frustration of waiting for one&amp;rsquo;s PR to work through the queue
+only to be rejected by a simple mistake.&lt;/p&gt;
+
+&lt;p&gt;We do this style of CI not only on &lt;a href=&#34;https://github.com/rust-lang/rust&#34;&gt;rust-lang/rust&lt;/a&gt; but also on other
+key projects, including &lt;a href=&#34;https://github.com/rust-lang/cargo&#34;&gt;cargo&lt;/a&gt; and &lt;a href=&#34;https://github.com/rust-lang/rustup.rs&#34;&gt;rustup&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;bors&amp;rsquo;s implementation has gone through several iterations, and today
+it is implemented by a script called &lt;a href=&#34;https://github.com/servo/homu&#34;&gt;homu&lt;/a&gt;, which is shared
+with Rust&amp;rsquo;s sister project, &lt;a href=&#34;http://github.com/servo&#34;&gt;Servo&lt;/a&gt;. It has also inspired other
+ther integration bots used in the Rust ecosystem and beyond,
+including &lt;a href=&#34;https://github.com/bors-ng/bors-ng&#34;&gt;bors-ng&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Test-first CI is the cornerstone of Rust stability.&lt;/p&gt;
+
+&lt;p&gt;Today we do our CI on &lt;a href=&#34;https://travis-ci.org/&#34;&gt;Travis CI&lt;/a&gt; for Linux and Mac OS, and &lt;a href=&#34;https://www.appveyor.com/&#34;&gt;AppVeyor&lt;/a&gt;
+for Windows. Notably, all of our testing hosts are running x86, and
+so, for the non-x86 platforms that we do test, we currently use the
+&lt;a href=&#34;https://en.wikipedia.org/wiki/QEMU&#34;&gt;QEMU&lt;/a&gt; emulator on Linux. Many non-x86 platforms do not yet get test
+coverage as part of the CI process (though see the &lt;a href=&#34;#s-smoke&#34;&gt;smoke&lt;/a&gt;
+project). No non-x86 platforms are automatically tested on real
+hardware, a major limitation of the current setup.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-cr&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;continuous-releases&#34;&gt;Continuous releases&lt;/h2&gt;
+
+&lt;p&gt;Since we test so thoroughly, ideally all bugs are caught before
+entering the tree, but that is not the case. Once a patch enters the
+tree the clock is ticking until it hits the stable release.&lt;/p&gt;
+
+&lt;p&gt;Rust publishes releases on three &amp;ldquo;channels&amp;rdquo;: nightly, beta, and stable.
+The nightly and beta channels provide an opportunity to catch bugs
+missed by the official CI before they hit a release.&lt;/p&gt;
+
+&lt;p&gt;Rust has a 6 week beta cycle, so the minimum a patch will sit in tree
+before hitting a stable release is 6 weeks (if it lands on master
+right before the next beta), and the maximum is 12 weeks (if it lands
+at the beginning of a cycle).&lt;/p&gt;
+
+&lt;p&gt;During the 6 week release cycle, regression triage meetings are held
+every 2 weeks to keep ahead of breakage and ensure the release stays
+on track. Again, the Rust release schedule is incredibly aggressive
+and it takes constant vigilence to maintain.&lt;/p&gt;
+
+&lt;p&gt;To make releases as simple as possible we tie it directly to the CI
+system. Since we are already testing Rust in the same configurations
+that we ship releases for, it&amp;rsquo;s a natural extension to simply produce
+release artifacts while we&amp;rsquo;re testing. So we do that and publish
+them to their own S3 bucket.&lt;/p&gt;
+
+&lt;p&gt;From those binaries we have a bot that periodically collects them into
+their final form for release and deploys them to static.rust-lang.org.&lt;/p&gt;
+
+&lt;p&gt;So not only do we fully test every commit that lands on master, we
+also publish the complete release binaries at the same time.&lt;/p&gt;
+
+&lt;p&gt;With as many release configurations as Rust has, differences between
+the continuous integration configuration and the release build
+configuration became a huge source of problems. Making testing and
+releasing the same thing eliminated them.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-ts&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;the-rust-test-suite&#34;&gt;The Rust test suite&lt;/h2&gt;
+
+&lt;p&gt;The Rust test suite covers rustc, std, cargo, rustdoc, and the Rust
+documentation, and features a number of special test harnesses to
+cover specific classes of bugs relevant to Rust.&lt;/p&gt;
+
+&lt;p&gt;The tests are all ultimately run by &lt;a href=&#34;https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/libtest&#34;&gt;libtest&lt;/a&gt;, the standard test
+crate, and many of them are coordinated by the &lt;a href=&#34;https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/tools/compiletest&#34;&gt;compiletest&lt;/a&gt; tool.&lt;/p&gt;
+
+&lt;p&gt;As of 2017/07/10 there are a little over 6k tests in the Rust test
+suite. This may seem surprisingly few, but keep in mind that Rust&amp;rsquo;s
+strong static typing prevents many errors at compile-time, so Rust
+projects in general are believed to require fewer test cases than
+projects in other languages. All features and bug fixes are
+accompanied by test cases. Still, test coverage is currently unknown,
+and assumed to be far from complete.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-ut&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;unit-tests&#34;&gt;Unit tests&lt;/h3&gt;
+
+&lt;p&gt;Standard Rust unit tests, like any Rust author would write. These are
+tests annotated with &lt;code&gt;#[test]&lt;/code&gt; and run with &lt;code&gt;cargo test&lt;/code&gt;. This is the
+primary method for testing the standard library, and for cargo as
+well.&lt;/p&gt;
+
+&lt;p&gt;This is the most basic kind of testing in Rust, but the compiler
+itself is mostly tested with more specialized tools.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-ct&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;compiletest&#34;&gt;compiletest&lt;/h3&gt;
+
+&lt;p&gt;compiletest is the main test harness of the Rust test suite, one of
+the oldest Rust codebases, and the oldest parallel Rust program. It
+implements a number of classes of test, each of which generally
+corresponds to a directory under &lt;a href=&#34;https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/test&#34;&gt;&lt;code&gt;src/test&lt;/code&gt;&lt;/a&gt;. Most of these tests
+involve driving the compiler to compile one or more source programs,
+then interpreting the results.&lt;/p&gt;
+
+&lt;p&gt;Most tests are represented by a Rust source file that may have
+annotations in comments directing compiletest in how to run the test,
+as in the following run-fail test, &lt;code&gt;test-panic.rs&lt;/code&gt;, that tells
+compiletest that the string &amp;ldquo;thread &amp;lsquo;test_foo&amp;rsquo; panicked at&amp;rdquo; must be
+printed to stdout, to compile with the &lt;code&gt;--test&lt;/code&gt; flag, and to ignore
+the test on emscripten.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// check-stdout&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// error-pattern:thread &amp;#39;test_foo&amp;#39; panicked at&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// compile-flags: --test&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// ignore-emscripten&lt;/span&gt;
+
+&lt;span class=&#34;cp&#34;&gt;#[test]&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;test_foo&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;panic&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Most of the test types in the following sections are implemented
+by compiletest.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-rpf&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;run-pass-and-run-fail&#34;&gt;run-pass and run-fail&lt;/h3&gt;
+
+&lt;p&gt;Two of the oldest and simplest types of test. These test cases are
+Rust source code that should compile successfully. run-pass tests must
+run successfully; run-fail tests must run and return the Rust standard
+error code, 101.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-cf&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;compile-fail&#34;&gt;compile-fail&lt;/h3&gt;
+
+&lt;p&gt;compile-fail tests are some of the most common tests for testing
+language features. They must fail to compile, and stderr must
+emit errors containing specific text:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;//~ ERROR invalid left-hand side expression&lt;/span&gt;
+    &lt;span class=&#34;m&#34;&gt;1&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+=&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;//~ ERROR invalid left-hand side expression&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;//~ ERROR invalid left-hand side expression&lt;/span&gt;
+
+    &lt;span class=&#34;k&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;a&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;b&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;4&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;//~ ERROR invalid left-hand side expression&lt;/span&gt;
+
+    &lt;span class=&#34;n&#34;&gt;None&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Some&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;3&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;//~ ERROR invalid left-hand side expression&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;While these are the bread and butter of rustc testing, their weakness
+is that they only validate some of the text output to stderr - they do
+not guarantee that the output actually looks good. For that reason new
+tests, or tests of tricky error output, are often written as &amp;lsquo;ui&amp;rsquo;
+tests.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-ui&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;ui&#34;&gt;ui&lt;/h3&gt;
+
+&lt;p&gt;UI tests are like compile-fail tests, but the output of stdout and
+stderr are checked fully. In these tests, instead of annotating the
+source with expected output, source files are accompanied by
+&lt;code&gt;*.stdout&lt;/code&gt; and &lt;code&gt;*.stderr&lt;/code&gt; templates that capture expactly what the
+compiler is allowed to output.&lt;/p&gt;
+
+&lt;p&gt;So the test &lt;code&gt;issue-39544.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;k&#34;&gt;enum&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;X&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;Y&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Z&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;X&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;z&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Z&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;X&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Y&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;};&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;mut&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;z&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;must have the output from &lt;code&gt;issue-39544.stderr&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;n&#34;&gt;error&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cannot&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;borrow&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;immutable&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;field&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;`&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;z&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;`&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;mutable&lt;/span&gt;
+  &lt;span class=&#34;o&#34;&gt;--&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;$DIR&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;issue&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;-&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;39544.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;rs&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;21&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;18&lt;/span&gt;
+   &lt;span class=&#34;o&#34;&gt;|&lt;/span&gt;
+&lt;span class=&#34;m&#34;&gt;21&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;|&lt;/span&gt;     &lt;span class=&#34;k&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;mut&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;z&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+   &lt;span class=&#34;o&#34;&gt;|&lt;/span&gt;                  &lt;span class=&#34;o&#34;&gt;^^^&lt;/span&gt;
+
+&lt;span class=&#34;n&#34;&gt;error&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;aborting&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;due&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;to&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;previous&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;error&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Because these templates are difficult to write by hand, there are
+scripts to help keep them updated when the output changes.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-rm&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;run-make&#34;&gt;run-make&lt;/h3&gt;
+
+&lt;p&gt;This is the kind of test you write when none of the other tests
+are sufficient. compiletest simply runs a Makefile, while setting
+up a bunch of environment variables that might be useful. Tests
+import &lt;a href=&#34;https://github.com/rust-lang/rust/blob/37849a002ed91ac2b80aeb2172364b4e19250e05/src/test/run-make/tools.mk&#34;&gt;tools.mk&lt;/a&gt; to get access to various helpers.&lt;/p&gt;
+
+&lt;p&gt;These tests are usually testing the behavior of rustc, like in this
+test that is validating something related to target specs:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-make&#34; data-lang=&#34;make&#34;&gt;&lt;span class=&#34;cp&#34;&gt;-include ../tools.mk&lt;/span&gt;
+&lt;span class=&#34;nf&#34;&gt;all&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt;
+	&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;RUSTC&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; foo.rs --target&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;my-awesome-platform.json --crate-type&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;lib --emit&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;asm
+	grep -q -v morestack &amp;lt; &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;TMPDIR&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/foo.s
+	&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;RUSTC&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; foo.rs --target&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;my-invalid-platform.json 2&amp;gt;&amp;amp;1 | grep -q &lt;span class=&#34;s2&#34;&gt;&amp;quot;Error loading target specification&amp;quot;&lt;/span&gt;
+	&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;RUSTC&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; foo.rs --target&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;my-incomplete-platform.json 2&amp;gt;&amp;amp;1 | grep &lt;span class=&#34;s1&#34;&gt;&amp;#39;Field llvm-target&amp;#39;&lt;/span&gt;
+	&lt;span class=&#34;nv&#34;&gt;RUST_TARGET_PATH&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;. &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;RUSTC&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; foo.rs --target&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;my-awesome-platform --crate-type&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;lib --emit&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;asm
+	&lt;span class=&#34;nv&#34;&gt;RUST_TARGET_PATH&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;. &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;RUSTC&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; foo.rs --target&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;x86_64-unknown-linux-gnu --crate-type&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;lib --emit&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;asm
+	&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;RUSTC&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; -Z unstable-options --target&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;my-awesome-platform.json --print target-spec-json &amp;gt; &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;TMPDIR&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/test-platform.json &lt;span class=&#34;o&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;RUSTC&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt; -Z unstable-options --target&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;TMPDIR&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/test-platform.json --print target-spec-json | diff -q &lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;TMPDIR&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;/test-platform.json -
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-cg&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;codegen&#34;&gt;codegen&lt;/h3&gt;
+
+&lt;p&gt;codegen tests verify that rustc produces the expected LLVM IR for a given file.
+It is similar to tests used by LLVM to verify its own lowering to assembly.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// compile-flags: -C no-prepopulate-passes&lt;/span&gt;
+
+&lt;span class=&#34;err&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;crate_type&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;s&#34;&gt;&amp;quot;lib&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;enum&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;E&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;A&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;B&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// CHECK-LABEL: @exhaustive_match&lt;/span&gt;
+&lt;span class=&#34;cp&#34;&gt;#[no_mangle]&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;exhaustive_match&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;e&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;E&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// CHECK: switch{{.*}}, label %[[DEFAULT:[a-zA-Z0-9_]+]]&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// CHECK: [[DEFAULT]]:&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// CHECK-NEXT: unreachable&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;match&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;e&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;E&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;A&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(),&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;E&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;B&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;(),&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-cgu&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;codegen-units&#34;&gt;codegen-units&lt;/h3&gt;
+
+&lt;p&gt;Like codegen tests these tests are validating the internal compiler
+behavior, in this case testing how items in Rust source are
+partitioned between &amp;ldquo;codegen units&amp;rdquo; at translation time. Correctly
+subdividing the work of translating Rust to LLVM and then machine code
+is required for incremental translation.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// compile-flags:-Zprint-trans-items=eager&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;static&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;FN&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;foo&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&amp;lt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;i32&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;foo&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;T&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;//~ TRANS_ITEM fn static_init::foo[0]&amp;lt;i32&amp;gt;&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;//~ TRANS_ITEM static static_init::FN[0]&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;//~ TRANS_ITEM fn static_init::main[0]&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;//~ TRANS_ITEM drop-glue i8&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-p&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;pretty&#34;&gt;pretty&lt;/h3&gt;
+
+&lt;p&gt;pretty tests are testing rustc&amp;rsquo;s &amp;ldquo;pretty printer&amp;rdquo;, the code that
+converts the Rust AST back to Rust syntax. Rust uses the pretty
+printer for displaying error messages.&lt;/p&gt;
+
+&lt;p&gt;pretty testing is done by asking the compiler to pretty-print source
+code, then asking it to pretty-print &lt;em&gt;that&lt;/em&gt; source code, and testing
+that it reaches a steady state, where further pretty-printing produces
+the same source, and that it still works.&lt;/p&gt;
+
+&lt;p&gt;Historically, rustc has run pretty testing over the entire codebase,
+but as the pretty-printer matured, pretty testing was reduced to a
+subset of the full tree.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-dbg&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;debuginfo&#34;&gt;debuginfo&lt;/h3&gt;
+
+&lt;p&gt;The problem of getting debuggers to understand the compiler&amp;rsquo;s output
+is nearly as difficult as just getting the compiler to work in the
+first place. Debuggers are so complicated. These tests drive gdb and
+lldb to verify they work with the given Rust program.&lt;/p&gt;
+
+&lt;p&gt;Here&amp;rsquo;s a simple example from &lt;code&gt;cross-crate-spans.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;err&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;feature&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;omit_gdb_pretty_printer_section&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+&lt;span class=&#34;err&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;omit_gdb_pretty_printer_section&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// min-lldb-version: 310&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// aux-build:cross_crate_spans.rs&lt;/span&gt;
+&lt;span class=&#34;k&#34;&gt;extern&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;crate&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cross_crate_spans&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// compile-flags:-g&lt;/span&gt;
+
+
+&lt;span class=&#34;c1&#34;&gt;// === GDB TESTS ===================================================================================&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:break cross_crate_spans.rs:24&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:run&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:print result&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdbg-check:$1 = {__0 = 17, __1 = 17}&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdbr-check:$1 = (17, 17)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:print a_variable&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-check:$2 = 123456789&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:print another_variable&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-check:$3 = 123456789.5&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:continue&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:print result&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdbg-check:$4 = {__0 = 1212, __1 = 1212}&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdbr-check:$4 = (1212, 1212)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:print a_variable&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-check:$5 = 123456789&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:print another_variable&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-check:$6 = 123456789.5&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// gdb-command:continue&lt;/span&gt;
+
+
+
+&lt;span class=&#34;c1&#34;&gt;// === LLDB TESTS ==================================================================================&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:b cross_crate_spans.rs:24&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:run&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:print result&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-check:[...]$0 = (17, 17)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:print a_variable&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-check:[...]$1 = 123456789&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:print another_variable&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-check:[...]$2 = 123456789.5&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:continue&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:print result&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-check:[...]$3 = (1212, 1212)&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:print a_variable&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-check:[...]$4 = 123456789&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:print another_variable&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-check:[...]$5 = 123456789.5&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// lldb-command:continue&lt;/span&gt;
+
+
+&lt;span class=&#34;c1&#34;&gt;// This test makes sure that we can break in functions inlined from other crates.&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+
+    &lt;span class=&#34;k&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cross_crate_spans&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;generic_function&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;17&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;u32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cross_crate_spans&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;generic_function&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1212&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;i16&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-inc&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;incremental&#34;&gt;incremental&lt;/h3&gt;
+
+&lt;p&gt;Tests of incremental compilation, a technique rustc uses to track
+within a crate which source code needs to be recompiled when any other
+source code changes.&lt;/p&gt;
+
+&lt;p&gt;In the example below, the test is run twice, first with &lt;code&gt;--cfg
+rpass1&lt;/code&gt;, then again with &lt;code&gt;--cfg rpass2&lt;/code&gt;. The test instructs the
+compiler to verify that the change in source code between the two
+invocations results in only mod &lt;code&gt;x&lt;/code&gt; being recompiled. Other modules
+are reused.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;c1&#34;&gt;// A first &amp;quot;spike&amp;quot; for incremental compilation: here, we change the&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// content of the `make` function, and we find that we can reuse the&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// `y` module entirely (but not the `x` module).&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// revisions:rpass1 rpass2&lt;/span&gt;
+
+&lt;span class=&#34;err&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;feature&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;rustc_attrs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+
+&lt;span class=&#34;err&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;rustc_partition_reused&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;module&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;spike&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cfg&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;rpass2&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+&lt;span class=&#34;err&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;rustc_partition_translated&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;module&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;spike-x&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cfg&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;rpass2&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+&lt;span class=&#34;err&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;rustc_partition_reused&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;module&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;spike-y&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cfg&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;rpass2&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;mod&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;X&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;u32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;u32&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+    &lt;span class=&#34;cp&#34;&gt;#[cfg(rpass1)]&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;make&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;X&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;X&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;22&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;0&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+    &lt;span class=&#34;cp&#34;&gt;#[cfg(rpass2)]&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;make&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;X&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;X&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;11&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;11&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+    &lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;new&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;X&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;make&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+    &lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;sum&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;X&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;u32&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;mod&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;use&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+    &lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;assert_sum&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bool&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;k&#34;&gt;let&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;new&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;sum&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;x&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;==&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;22&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;n&#34;&gt;y&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;::&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;assert_sum&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;();&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-mir&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;mir-opt&#34;&gt;mir-opt&lt;/h3&gt;
+
+&lt;p&gt;Tests of optimizations on MIR, rustc&amp;rsquo;s internal Rust
+representation. These tests check that the MIR looks as expected
+before and after given optimization passes.&lt;/p&gt;
+
+&lt;p&gt;Note that as of 2017/07/10 MIR optimizations are not enabled by
+default.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;main&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;false&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;println&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;hello world!&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+
+&lt;span class=&#34;c1&#34;&gt;// END RUST SOURCE&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// START rustc.node4.SimplifyBranches-initial.before.mir&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// bb0: {&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;//     switchInt(const false) -&amp;gt; [0u8: bb2, otherwise: bb1];&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// }&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// END rustc.node4.SimplifyBranches-initial.before.mir&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// START rustc.node4.SimplifyBranches-initial.after.mir&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// bb0: {&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;//     goto -&amp;gt; bb2;&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// }&lt;/span&gt;
+&lt;span class=&#34;c1&#34;&gt;// END rustc.node4.SimplifyBranches-initial.after.mir&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-rd&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;rustdoc&#34;&gt;rustdoc&lt;/h3&gt;
+
+&lt;p&gt;This set of tests verifies that the HTML output of rustdoc includes
+various properties. Again, they are run by compiletest by interpreting
+comments in Rust source files. They look something like:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre&gt;&lt;code class=&#34;language-rust&#34; data-lang=&#34;rust&#34;&gt;&lt;span class=&#34;err&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;crate_type&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;quot;lib&amp;quot;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;
+
+&lt;span class=&#34;err&#34;&gt;#&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;!&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;feature&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;const_fn&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)]&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;struct&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Foo&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;;&lt;/span&gt;
+
+&lt;span class=&#34;k&#34;&gt;impl&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Foo&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+    &lt;span class=&#34;c1&#34;&gt;// @has const/struct.Foo.html &amp;#39;//*[@id=&amp;quot;new.v&amp;quot;]//code&amp;#39; &amp;#39;const unsafe fn new&amp;#39;&lt;/span&gt;
+    &lt;span class=&#34;k&#34;&gt;pub&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;const&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;unsafe&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;fn&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;new&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Foo&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+        &lt;span class=&#34;n&#34;&gt;Foo&lt;/span&gt;
+    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-doc&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;documentation&#34;&gt;documentation&lt;/h3&gt;
+
+&lt;p&gt;Rust uses Markdown for both API documentation and standalone
+documentation. All examples in Rust documentation are tested by
+rustdoc, the documentation tool.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-link&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;linkchecker&#34;&gt;linkchecker&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/tools/linkchecker&#34;&gt;linkchecker&lt;/a&gt; ensures that all internal HTML links produced by
+rustdoc for the standard library documentation are valid.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-crt&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;cargotest&#34;&gt;cargotest&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/tools/cargotest&#34;&gt;cargotest&lt;/a&gt; is a small tool that runs the test suite of several
+significant out-of-tree Rust projects. The projects are chosen to have
+a wide variety of dependencies to maximize the chances of detecting
+type system regressions through build failures.&lt;/p&gt;
+
+&lt;p&gt;This suite of tests was added in anger after cargo&amp;rsquo;s own build broke
+too many times due to Rust regressions.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-err&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;check-error-index&#34;&gt;check-error-index&lt;/h3&gt;
+
+&lt;p&gt;rustc&amp;rsquo;s error messages included extended help messages that often
+include examples. As with other documentation examples, these are
+tested.  A special tool is used to extract them from the compiler,
+convert them to markdown, and then run them through rustdoc.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-dist&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;distcheck&#34;&gt;distcheck&lt;/h3&gt;
+
+&lt;p&gt;Every release of Rust is accompanied by a tarball containing the
+source. This check verifies that that source tarball unpacks, builds
+and tests as expected.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-tidy&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;tidy&#34;&gt;tidy&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/tools/tidy&#34;&gt;tidy&lt;/a&gt; tool runs a variety of sanity checks that the source tree
+conforms to various conventions:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;bins&lt;/em&gt; - verifies that no binaries are checked in&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;style&lt;/em&gt; - verifies line length, no tabs, no trailing whitespace, no
+CR characters, no TODO or XXX directives, and that each file
+contains a license header&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;errors&lt;/em&gt; - verifies that rustc error codes are not duplicated&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;cargo&lt;/em&gt; - verifies that crates listed in &lt;code&gt;[dependencies]&lt;/code&gt; are
+actually imported as &lt;code&gt;extern crate&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;features&lt;/em&gt; - verifies that various properties of Rust&amp;rsquo;s &amp;lsquo;feature&amp;rsquo;
+definitions are correct&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;pal&lt;/em&gt; - verifies that platform-specific code only occurs in
+specific places&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;unstable_book&lt;/em&gt; - verifies that unstable features are represented
+in the documentation&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;deps&lt;/em&gt; - verifies the license of third-party crate dependencies&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-boot&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;bootstrap&#34;&gt;bootstrap&lt;/h3&gt;
+
+&lt;p&gt;The Rust build system (called &amp;ldquo;bootstrap&amp;rdquo;) itself is written in Rust
+and has a self-check that runs before the build begins.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-tools&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;tools&#34;&gt;tools&lt;/h3&gt;
+
+&lt;p&gt;Rust is distributed with several externally-developed tools, today
+cargo and rls (the Rust Language Server). Their test suites are
+included as part of the Rust test suite.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-ot&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;other-testing&#34;&gt;Other testing&lt;/h2&gt;
+
+&lt;p&gt;All of the above sections describe the Rust test suite, which is Run
+prior to landing any patch. But that is neither the beginning nor the
+end of the Rust validation process. Below are yet more tools we use to
+test other aspects of the Rust platform. This includes tools and
+libraries Rust depends on, and the application of additional
+validation to releases during their nightly and beta phases, prior to
+their stable release.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-ds&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;cargobomb-and-crater&#34;&gt;cargobomb and crater&lt;/h3&gt;
+
+&lt;p&gt;In would be lovely if the Rust test suite caught all regressions.
+Sadly, the authors of the test suite haven&amp;rsquo;t yet figured out how to
+anticipate every way in which Rust will be used in the wild.&lt;/p&gt;
+
+&lt;p&gt;Fortunately though, Rust has a standard testing facility that most
+Rust crates use, and Rust has a standard repository of Rust crates in
+crates.io. GitHub further contains repositories of Rust crates that
+are not published to crates.io.&lt;/p&gt;
+
+&lt;p&gt;These factors allow us to treat the entire world of open source Rust
+code as our test suite.&lt;/p&gt;
+
+&lt;p&gt;As new nightlies and betas are published, we use the &lt;a href=&#34;https://github.com/brson/cargobomb&#34;&gt;cargobomb&lt;/a&gt; tool
+to test this corpus of Rust code (as of 2017/07/10 over 13,000 crates)
+against both the stable release and a nightly or beta release,
+comparing the results for regressions.&lt;/p&gt;
+
+&lt;p&gt;This type of testing helps us find subtle changes in the type system
+as crates fail to build on new releases, errors in code generation or
+library behavior that cause tests to fail or crash, and logic errors
+in the compiler that cause the compiler to crash.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://cargobomb-reports.s3-website-us-west-1.amazonaws.com/nightly-2017-06-12/index.html&#34;&gt;Here&amp;rsquo;s an example of a cargobomb run against nightly&lt;/a&gt;.
+Clicking the red &amp;ldquo;regressed&amp;rdquo; button reveals the most important
+category of results: those where the build against the second
+toolchain failed earlier than the first toolchain. Clicking through
+the results yields the full logs. In this run, 6972 of the 13055
+crates tested passed their test suites against both toolchains; 56
+crates regressed; and 3985 crates failed to even build (this can be
+for many reasons, but is often simply because the cargobomb
+environment is not set up appropriately for the crate).&lt;/p&gt;
+
+&lt;p&gt;As of 2017/07/10, each run of cargobomb runs over 222,000 tests, twice
+over, across more than 13,000 projects.&lt;/p&gt;
+
+&lt;p&gt;When cargbomb detects regressions, they are filed against
+rust-lang/rust, and the downstream crate authors alerted to the
+issue. Using the binary builds published for every successful PR, the
+PR that caused the regression is quickly identified by the
+&lt;a href=&#34;https://github.com/Mark-Simulacrum/bisect-rust&#34;&gt;bisect-rust&lt;/a&gt; tool.&lt;/p&gt;
+
+&lt;p&gt;As cargobomb-discovered regressions are fixed, naturally test cases
+capturing them are checked in to prevent those regressions occurring
+again in the future.&lt;/p&gt;
+
+&lt;p&gt;cargobomb is the successor to a similar project called &lt;a href=&#34;https://github.com/brson/taskcluster-crater&#34;&gt;crater&lt;/a&gt;, which
+only checks for successful typechecking, and does not run test suites.
+It is still in occasional use.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-libc&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;libc&#34;&gt;libc&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://github.com/rust-lang/libc&#34;&gt;libc&lt;/a&gt; crate has a special place in the ecosystem: it defines the
+FFI definitions of the C library and related systems libraries for
+every platform Rust supports, and ends up used in some form by most
+every Rust project. So it&amp;rsquo;s important that it be correct.&lt;/p&gt;
+
+&lt;p&gt;But writing correct FFI bindings is not a simple thing, since one does
+not have the benefit of the Rust type checker verifying the
+definitions. So the libc crate has a special testing regime designed
+to accomplish this verification.&lt;/p&gt;
+
+&lt;p&gt;It uses the &lt;a href=&#34;https://github.com/alexcrichton/ctest&#34;&gt;ctest&lt;/a&gt; crate to automatically compare the libc Rust
+bindings to the actual C definition.&lt;/p&gt;
+
+&lt;p&gt;The basic process involves generating two programs, one in C, and one
+in Rust, that each produce metadata about function signatures,
+constant values, struct layout, alignment, and more. The Rust program
+calls into the C program and then compares that both sides produce the
+same metadata values.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-cb&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;compiler-builtins&#34;&gt;compiler-builtins&lt;/h3&gt;
+
+&lt;p&gt;This touches on a little known piece of black magic in comon compiler
+toolchains. One might expect that C compilers like gcc and clang
+compile your code directly to machine code, but in actuality, there
+are a number of constructs defined in the language which do not
+necessarily correspond neatly to machine instructions, depending on
+the architecture. As a consequence, nearly all C programs silently
+link to a tiny runtime library to provide implementations of very low
+level operations. In gcc this library is called &lt;a href=&#34;https://gcc.gnu.org/onlinedocs/gccint/Libgcc.html&#34;&gt;libgcc&lt;/a&gt;, and in clang
+it is called &lt;a href=&#34;https://github.com/rust-lang/compiler-rt&#34;&gt;compiler-rt&lt;/a&gt;, which began essentially by
+reverse-engineering libgcc.&lt;/p&gt;
+
+&lt;p&gt;LLVM will silently lower LLVM IR to calls to functions provided by
+compiler-rt, so rustc, like clang, must ensure these functions are
+available.&lt;/p&gt;
+
+&lt;p&gt;This library is implemented in a combination of assembly and C, and
+has over time grown to include a variety of runtime functionality
+expected by LLVM for sometimes niche features.&lt;/p&gt;
+
+&lt;p&gt;Over the years we&amp;rsquo;ve found it quite challenging to keep compiler-rt
+working on all platforms Rust (and LLVM) supports, so are in the
+gradual process of reimplementing it ourselves (in Rust), in a library
+called &lt;a href=&#34;https://github.com/rust-lang-nursery/compiler-builtins&#34;&gt;compiler-builtins&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The compiler-builtins crate is exclusively limited to basic math
+intrinsics, and does not include many of the advanced runtime features
+of compiler-rt, notably the sanitizer runtimes (which in Rust we would
+expect to be provided in a different crate).&lt;/p&gt;
+
+&lt;p&gt;To verify this set of crucial low-level math functions behaves as
+expected the compiler-builtin crate has its own custom testing. For
+each function there is a test that generates a set of inputs to it,
+and passes it to both the upstream compiler-rt, and to our own
+compiler-builtins, and verifies their same output. The test suite
+additionally compares the symbols exported by each to ensure our
+implementation does not miss any functions.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-perf&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;perf-rust-lang-org&#34;&gt;perf.rust-lang.org&lt;/h3&gt;
+
+&lt;p&gt;It&amp;rsquo;s a long-standing desire of the team to get a stronger handle on
+rustc&amp;rsquo;s compile times, and to prevent them from increasing.
+&lt;a href=&#34;http://perf.rust-lang.org/&#34;&gt;perf.rust-lang.org&lt;/a&gt; is a project that uses the CI builds of Rust to
+build a variety of representative Rust code bases and record how long
+it took, and how much memory was used. The compiler team then uses the
+reporting provided by the site to identify performance regressions.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-fuzz&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;fuzzing&#34;&gt;fuzzing&lt;/h3&gt;
+
+&lt;p&gt;There are two major fuzzers for Rust: &lt;a href=&#34;https://github.com/rust-fuzz/afl.rs&#34;&gt;afl.rs&lt;/a&gt;, which uses the
+&lt;a href=&#34;http://lcamtuf.coredump.cx/afl/&#34;&gt;American Fuzzy Lop&lt;/a&gt; fuzzer; and &lt;a href=&#34;https://github.com/rust-fuzz/cargo-fuzz&#34;&gt;cargo-fuzz&lt;/a&gt;, which uses LLVM&amp;rsquo;s
+&lt;a href=&#34;http://llvm.org/docs/LibFuzzer.html&#34;&gt;libfuzzer&lt;/a&gt;. Both project collaborate under the &lt;a href=&#34;https://github.com/rust-fuzz&#34;&gt;Rust Fuzzing
+Authority&lt;/a&gt; to improve the Rust crate ecosystem. They
+maintain a &lt;a href=&#34;https://github.com/rust-fuzz/trophy-case&#34;&gt;trophy case&lt;/a&gt; of bugs discovered through their tools.
+Although an important part of the Rust toolset, fuzzing Rust tends to
+find fewer and less severe bugs than fuzzing software written in
+memory-unsafe languages.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-icci&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;rust-icci&#34;&gt;rust-icci&lt;/h3&gt;
+
+&lt;p&gt;The Rust compiler supports a technique called &amp;ldquo;incremental
+compilation&amp;rdquo;, a process by which the compiler tracks, on a very
+fine-grained level, dependencies between items in the code, to avoid
+re-typechecking and re-translating fetaures that have not changed
+since previous compilations. It can be thought of roughly as caching
+and reusing previously translated functions. The system is extremely
+complex and opportunities for errors are innumerable.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/rust-icci&#34;&gt;rust-icci&lt;/a&gt; is a project that does brute-force validation of Rust
+incremental compilation by replaying the commit history of Rust
+projects with incremental compilation activitated, and without, and
+verifies that the results are the same.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-fx&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;firefox-beta-testing&#34;&gt;Firefox beta testing&lt;/h3&gt;
+
+&lt;p&gt;One of the major initial users of Rust is the Firefox web browser,
+which has integrated Rust into a number of subsystems of a large C++
+codebase that supports a variety of platforms across millions of
+client systems. This real-world exposure quickly began to expose
+regressions in Rust, and so Firefox is &lt;a href=&#34;https://bugzilla.mozilla.org/show_bug.cgi?id=1337955&#34;&gt;built and tested against Rust
+betas&lt;/a&gt; as they are produced, providing important feedback during
+the Rust beta cycle.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-form&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;formal-verification&#34;&gt;Formal verification&lt;/h3&gt;
+
+&lt;p&gt;Ultimately we hope and expect Rust to be adopted by industries that
+traditionally require strong guarantees about reliability and
+correctness. These industries are conservative and slow to change, and
+tend to require large accumulations of evidence of correctness; and
+formal proofs provide some of the strongest such
+evidence. Furthermore, having formal models of the Rust system gives
+the Rust developers a framework to confidently apply advanced
+optimizations to Rust that are not yet possible.&lt;/p&gt;
+
+&lt;p&gt;The most prominent project applying formal methods to validate Rust is
+the &lt;a href=&#34;http://plv.mpi-sws.org/rustbelt/&#34;&gt;Rust Belt&lt;/a&gt; project, which aims to prove the Rust type system
+sound, and to develop a model for reasoning about unsafe code in Rust.
+It has thus far &lt;a href=&#34;https://people.mpi-sws.org/~dreyer/papers/rustbelt/paper.pdf&#34;&gt;proven the soundness&lt;/a&gt; of the most common
+abstractions in the standard library, discovering &lt;a href=&#34;https://www.ralfj.de/blog/2017/06/09/mutexguard-sync.html&#34;&gt;one soundness
+bug&lt;/a&gt; in the process.&lt;/p&gt;
+
+&lt;p&gt;Previously, Eric Reed formalized a safe subset of Rust called
+&lt;a href=&#34;https://www.cs.washington.edu/tr/2015/03/UW-CSE-15-03-02.pdf&#34;&gt;Patina&lt;/a&gt;, and the &lt;a href=&#34;http://ieeexplore.ieee.org/document/7371997/&#34;&gt;CRUST&lt;/a&gt; project used bounded model checking to find
+memory safety violation.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-smoke&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;smoke&#34;&gt;smoke&lt;/h3&gt;
+
+&lt;p&gt;Many of the platforms that Rust supports, though they may be &lt;em&gt;built&lt;/em&gt;
+by Rust&amp;rsquo;s CI, are not &lt;em&gt;tested&lt;/em&gt; by Rust&amp;rsquo;s CI, either because of lack of
+capacity, or because it would take too long (often due to emulation).&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://github.com/japaric/smoke&#34;&gt;smoke&lt;/a&gt; project is an independent CI project to run tests against
+some of these platforms using emulators.&lt;/p&gt;
+
+&lt;p&gt;Note that as of 2017/07/10 the smoke project is bitrotted and needs to
+be refreshed.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-ru&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;rustup&#34;&gt;rustup&lt;/h3&gt;
+
+&lt;p&gt;Though not strictly a part of the Rust distribution, &lt;a href=&#34;https://github.com/rust-lang/rustup.rs&#34;&gt;rustup&lt;/a&gt; is a
+critical piece of the Rust distribution infrastructure. It is the tool
+that installs Rust for most Rust users. While limited in scope, in
+performs important network and and file I/O that must be reliable
+across all supported platforms. rustup is self-updating, and a
+self-update failure would cause major disruption for Rust users.&lt;/p&gt;
+
+&lt;p&gt;rustup&amp;rsquo;s primary functionality works by downloading a release
+&amp;ldquo;manifest&amp;rdquo; from the official Rust servers, and interpreting it
+to install the requested Rust releases.&lt;/p&gt;
+
+&lt;p&gt;While its test scaffolding includes a mock distribution server, it
+notably it does not contain actual network tests. In general, rustup&amp;rsquo;s
+testing could be much more thorough.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-clippy&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;clippy&#34;&gt;clippy&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/Manishearth/rust-clippy&#34;&gt;clippy&lt;/a&gt; provides additional static analysis (called &amp;ldquo;lints&amp;rdquo;) beyond
+what is done by the compiler. While not distributed by the compiler,
+and rarely run on the Rust codebase itself, it is widely used by the
+Rust community to provide an extra level of consistency and polish, so
+seems worth mentioning.&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&#34;s-f&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;notes-and-future-work&#34;&gt;Notes and future work&lt;/h2&gt;
+
+&lt;p&gt;So Rust receives a lot of testing, but there&amp;rsquo;s more that can be
+done. Here we&amp;rsquo;ll say a little bit about other possibilities. Almost
+everything here would be an awesome project for an ambitious
+contributor to undertake!&lt;/p&gt;
+
+&lt;p&gt;An obvious omission is the lack of any testing with tools like
+&lt;a href=&#34;http://valgrind.org/&#34;&gt;valgrind&lt;/a&gt; and &lt;a href=&#34;https://github.com/google/sanitizers&#34;&gt;address sanitizer&lt;/a&gt;. These tools are incredibly
+effective at finding incorrect memory accesses by instrumenting
+programs at runtime, so with Rust&amp;rsquo;s focus on memory safety one might
+expect them to be employed extensively. They are not though.&lt;/p&gt;
+
+&lt;p&gt;Valgrind was a crucial tool in Rust&amp;rsquo;s original development, back when
+Rust barely worked. There were several years where the entire test
+suite was required to be valgrind-clean, and it&amp;rsquo;s hard to imagine
+bringing up Rust without it. At some point though &lt;a href=&#34;https://github.com/rust-lang/rust/issues/11710&#34;&gt;LLVM began doing a
+valid optimization&lt;/a&gt; that valgrind was unable to recognize as valid, and
+that made its application useless for us, or at least too difficult to
+maintain. By that point Rust was mature and memory safe, so valgrind
+testing was disabled, and eventually it bitrotted and was removed from
+the tree.&lt;/p&gt;
+
+&lt;p&gt;Unlike valgrind, address sanitizer requires the help of the compiler
+to instrument binaries, and that support landed in LLVM long after
+Rust had matured.&lt;/p&gt;
+
+&lt;p&gt;Today rustc&amp;rsquo;s code generation and the abstractions in the standard
+library are mature and well-trusted, and it&amp;rsquo;s rare for either of them
+to create the kind of errors these tools detect, so nobody feels it a
+pressing matter to reenable this kind of testing.&lt;/p&gt;
+
+&lt;p&gt;We do not measure test coverage of the Rust compiler, and have no
+conception of how well it is covered. Integration of coverage
+reporting into Rust CI is an obvious and easy improvement.&lt;/p&gt;
+
+&lt;p&gt;The Rust source tree contains a poorly-maintained definition of the
+Rust language &lt;a href=&#34;https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/grammar&#34;&gt;grammar&lt;/a&gt;, along with the facilities for testing that
+grammar against the compiler&amp;rsquo;s production parser. These tests have
+never been activated as part of Rust&amp;rsquo;s CI though and as a result the
+grammar is neither complete nor authoritative.&lt;/p&gt;
+
+&lt;p&gt;The Rust installers, of which there are several different types, are
+not automatically tested, and there is a notable lack of human-driven
+QA during the Rust release process. It would be greatly desirable to
+automate the deployment and installation of Rust in a variety of
+scenarios via a test environment prior to release.&lt;/p&gt;
+
+&lt;p&gt;In the future we expect to develop a formal definition of Rust&amp;rsquo;s
+memory model, which will define what is and isn&amp;rsquo;t allowed to be done
+in unsafe blocks, and also what the compiler is allowed to do during
+optimization. The memory model will be defined in such a way that Rust
+code can be instrumented to validate conformance, and we will run
+conformance tests across the entire ecosystem with the cargobomb tool.&lt;/p&gt;
+
+&lt;p&gt;The Rust standard library is intended to provide a superset of the
+core library API, but there is no validation that this is true, and
+already there are known places where the two crates diverge in their
+APIs. There should be a tool that verifies the superset relationship.&lt;/p&gt;
+
+&lt;p&gt;Rust would probably benefit from &amp;ldquo;chaos engineering&amp;rdquo;, that is,
+injecting faults into the runtime and confirming that the system
+behaves as expected. Panic and error paths are little exercised and
+tend to hide bugs, especially around the interaction between &lt;code&gt;unsafe&lt;/code&gt;
+and unwinding. Of course the standard library is small and
+well-reviewed, so the returns of such an effort may be small there,
+but it would almost certainly be fruitful to apply the appoach more
+broadly in the crate ecosystem.&lt;/p&gt;
+
+&lt;p&gt;Rust crates use an interpretation of the semver versioning standard.
+Among other things it defines what API changes are allowed between
+releases of crates. We expect in the future to provide a tool that
+crate authors can use to validate that the API changes in their
+releases correspond to semver.&lt;/p&gt;
+
+&lt;p&gt;We also expect to provide other tools to help the crate ecosystem
+manage their evolution. &lt;a href=&#34;https://github.com/brson/cargo-crusader&#34;&gt;cargo-crusader&lt;/a&gt; is one such tool, though it
+is not fully-realized. It runs the test suites of a crate&amp;rsquo;s reverse
+dependencies (that is, the crates that depend on your crate) prior to
+publishing a new version.&lt;/p&gt;
+
+&lt;p&gt;We have no tracking of metrics around regression rates from release to
+release, despite being vigilant about testing downstream crates. We
+should expect in the future to be able to provide firm numbers on
+known regressions per release.&lt;/p&gt;
+
+&lt;p&gt;The cargobomb technique of testing all known Rust code in the
+ecosystem is powerful, but currently limited to running crates&amp;rsquo; test
+suites to detect Rust language regressions. There are other types of
+analyses we would like to do in this fashion.&lt;/p&gt;
+
+&lt;p&gt;The security of the Rust release process is crucial, and lacking.  The
+possibility of the compiler being backdoored, or even the subject of a
+&amp;ldquo;&lt;a href=&#34;https://www.ece.cmu.edu/~ganger/712.fall02/papers/p761-thompson.pdf&#34;&gt;trusting trust&lt;/a&gt;&amp;rdquo; attack, is real. In the future we expect to have
+reproducible builds, and reproducible releases, meaning that
+third-parties can produce the exact same binary releases the Rust
+project does.  With that capability we would be able to produce a
+simple tool that would let others validate that any individual release
+has not been compromised with code that does not originate from the
+source tree; and ultimately, to validate that the entire bootstrap
+chain has not been compromised by a self-replicating, &amp;ldquo;trusting trust&amp;rdquo;
+-style backdoor.&lt;/p&gt;
+
+&lt;p&gt;Along those same lines, &lt;em&gt;someday&lt;/em&gt; we would expect to have multiple
+implementations of Rust to validate against the reference compiler,
+and to provide further assurance against &amp;ldquo;trusting trust&amp;rdquo; via &lt;a href=&#34;https://www.dwheeler.com/trusting-trust/&#34;&gt;diverse
+double compilation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;rustup should do mock testing using a self-contained http server,
+whereas today its mock server is just using a filesystem mimicking the
+layout of static.rust-lang.org.&lt;/p&gt;
+
+&lt;p&gt;rustup should have a set of self-upgrade tests, run against the live
+rustup release archives, and run prior to releases, that ensure that
+it can self-upgrade from the original release up to the present
+release.&lt;/p&gt;
+
+&lt;!-- links --&gt;
+</description>
+    </item>
     
     <item>
       <title>LLVM</title>
-      <link>http://systemundertest.org/llvm/</link>
+      <link>https://systemundertest.org/llvm/</link>
       <pubDate>Thu, 24 Mar 2016 23:18:29 +0100</pubDate>
       
-      <guid>http://systemundertest.org/llvm/</guid>
+      <guid>https://systemundertest.org/llvm/</guid>
       <description>
 
 &lt;h3 id=&#34;what-is-llvm-about&#34;&gt;What is LLVM about?&lt;/h3&gt;
@@ -54,7 +1163,7 @@ These tests are located in &amp;lsquo;unittests&amp;rsquo; directory.&lt;/p&gt;
 
 &lt;p&gt;Showing this beautiful output:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_llvm/unit_tests.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_llvm/unit_tests.png&#34;
   style=&#34; display: block;
           margin-left: auto;
           margin-right: auto;
@@ -97,7 +1206,7 @@ It takes about 4 minutes to run on my machine using 4 threads.&lt;/p&gt;
 
 &lt;p&gt;The output is pretty similar to one above:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://systemundertest.org/img/sut_llvm/regression_tests.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://systemundertest.org/img/sut_llvm/regression_tests.png&#34;
   style=&#34; display: block;
           margin-left: auto;
           margin-right: auto;

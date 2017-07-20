@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>make on System Under Test</title>
-    <link>https://systemundertest.org/tags/make/index.xml</link>
-    <description>Recent content in make on System Under Test</description>
+    <title>Make on System Under Test</title>
+    <link>https://systemundertest.org/tags/make/</link>
+    <description>Recent content in Make on System Under Test</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Brought to you by curious developers</copyright>
-    <atom:link href="/tags/make/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 12 Jun 2016 21:05:00 +0200</lastBuildDate>
+    <atom:link href="/tags/make/" rel="self" type="application/rss+xml" />
     
     <item>
       <title>GNU Make</title>

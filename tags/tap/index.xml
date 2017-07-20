@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>tap on System Under Test</title>
-    <link>https://systemundertest.org/tags/tap/index.xml</link>
-    <description>Recent content in tap on System Under Test</description>
+    <title>Tap on System Under Test</title>
+    <link>https://systemundertest.org/tags/tap/</link>
+    <description>Recent content in Tap on System Under Test</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Brought to you by curious developers</copyright>
-    <atom:link href="/tags/tap/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 31 Mar 2016 17:22:59 +0200</lastBuildDate>
+    <atom:link href="/tags/tap/" rel="self" type="application/rss+xml" />
     
     <item>
       <title>FreeBSD</title>

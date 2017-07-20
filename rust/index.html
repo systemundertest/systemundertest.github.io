@@ -1,0 +1,1400 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  
+  <meta charset="UTF-8">
+
+  <title>
+    Rust | System Under Test
+  </title>
+
+  <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+
+  
+  <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1,initial-scale=1">
+
+  
+  <link rel="canonical" href="https://systemundertest.org/rust/"/>
+
+  
+  <link rel="stylesheet" href="/css/sanitize.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  
+  <link rel="stylesheet" href="/css/syntax.css">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/custom.css">
+  <link rel="stylesheet" href="/css/spoiler.css">
+  
+  
+  <link href="https://systemundertest.org/index.xml" rel="alternate" type="application/rss+xml" title="System Under Test" />
+  <link href="https://systemundertest.org/index.xml" rel="feed" type="application/rss+xml" title="System Under Test" />
+
+  
+  
+
+  
+    <meta name="keywords" content="rust,tests,fuzz testing,unit testing,performance testing,regression testing,continuous integration" />
+  
+
+  
+    <meta name="description" content="How Software is Tested" />
+  
+ 
+
+</head>
+
+
+
+<body>
+<div class="container">
+
+  
+  <header role="banner">
+    <div class="row gutters">
+      <div id="site-title" class="col span_6">
+        <h1><a href="https://systemundertest.org/">System Under Test</a></h1>
+        <h2>How Software is Tested</h2>
+      </div>
+      <div id="social" class="col span_6">
+        <ul>
+          <li><a href="https://systemundertest.org//post">Posts</a></li>
+          <li><a href="https://systemundertest.org//interview">Interviews</a></li>
+          <li><a href="https://twitter.com/systemundertest" target="_blank">Twitter</a></li>
+          <li><a href="https://systemundertest.org/index.xml" type="application/rss+xml" target="_blank">RSS</a></li>
+          <li><a href="https://systemundertest.org//about">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+
+  
+  <main id="single" role="main">
+    <div class="article-header">
+      <h1>Rust</h1>
+          <div class="meta">
+      Jul 10, 2017 &nbsp;
+      
+        #<a href="/categories/compilers">Compilers</a>&nbsp;
+      
+
+    </div>
+    <div class="meta">
+      
+        
+          by @<a href="https://brson.github.io" target="_blank">brson</a>&nbsp;
+        
+      
+    </div>
+
+
+    </div>
+    <article>
+      
+
+<p><em>This is a cross-post from <a href="https://brson.github.io">Brian Anderson&rsquo;s blog</a>. Original post is <a href="https://brson.github.io/2017/07/10/how-rust-is-tested">here</a>.</em></p>
+
+<p>Rust is a systems programming language with massive ambitions. It is
+designed for creating the most reliable software, from the tiniest
+embedded systems to multi-million line behemoths, and its users need
+to have confidence that it is fit for purpose.</p>
+
+<p>In service of this ambition Rust has an extremely thorough testing
+regimen, and that is one of the things I am most proud of about Rust.
+Rust has a strict continuous integration system that runs a great
+number of tests on every pull request, basically guaranteeing that the
+Rust master branch always works; which is crucial because Rust
+releases nightly builds every night, and stable builds every six
+weeks. And Rust further tests every release against its entire open
+source library ecosystem.</p>
+
+<p>I&rsquo;ve always admired well-tested software projects, like <a href="https://sqlite.org/testing.html">SQLite</a>, and
+aim to place Rust among the pantheon of the best. This document then,
+is a catalog of all the ways we test Rust. I hope it provides insight
+into what it takes to deliver a production-quality programming
+language, a hint at the wide variety of techniques employed in
+software validation, and that it reinforces your confidence in Rust&rsquo;s
+reliability.</p>
+
+<h2 id="summary-2017-07-10">Summary (2017/07/10)</h2>
+
+<ul>
+<li>All patches built in 58 configurations before landing</li>
+<li>All patches tested in 20 configurations before landing</li>
+<li>126k tests per PR across all platforms</li>
+<li>Full release artifacts published for 48 platforms every merge</li>
+<li>Testing of all documentation</li>
+<li>Releases every six weeks</li>
+<li>13k Rust projects regression-tested before releases</li>
+<li>222k tests in Rust projects tested before releases</li>
+<li>Fuzz testing and formal verification</li>
+</ul>
+
+<h2 id="contents">Contents</h2>
+
+<ul>
+<li><a href="#s-pr">The promise of Rust</a></li>
+<li><a href="#s-ci">Continuous integration</a></li>
+<li><a href="#s-cr">Continuous releases</a></li>
+<li><a href="#s-ts">The Rust test suite</a>
+
+<ul>
+<li><a href="#s-ut">Unit tests</a></li>
+<li><a href="#s-ct">compiletest</a> - The Rust test suite test driver</li>
+<li><a href="#s-rpf">run-pass and run-fail</a></li>
+<li><a href="#s-cf">compile-fail</a></li>
+<li><a href="#s-ui">ui</a></li>
+<li><a href="#s-rm">run-make</a></li>
+<li><a href="#s-cg">codegen</a></li>
+<li><a href="#s-cgu">codegen-units</a></li>
+<li><a href="#s-p">pretty</a></li>
+<li><a href="#s-dbg">debuginfo</a></li>
+<li><a href="#s-inc">incremental</a></li>
+<li><a href="#s-mir">mir-opt</a></li>
+<li><a href="#s-rd">rustdoc</a></li>
+<li><a href="#s-doc">documentation</a></li>
+<li><a href="#s-link">linkchecker</a></li>
+<li><a href="#s-crt">cargotest</a></li>
+<li><a href="#s-err">check-error-index</a></li>
+<li><a href="#s-dist">distcheck</a></li>
+<li><a href="#s-tidy">tidy</a></li>
+<li><a href="#s-boot">bootstrap</a> - Build system self-check</li>
+<li><a href="#s-tools">tools</a></li>
+</ul></li>
+<li><a href="#s-ot">Other testing</a>
+
+<ul>
+<li><a href="#s-ds">cargobomb and crater</a> - Downstream testing</li>
+<li><a href="#s-libc">libc</a></li>
+<li><a href="#s-cb">compiler-builtins</a></li>
+<li><a href="#s-perf">perf.rust-lang.org</a></li>
+<li><a href="#s-fuzz">fuzzing</a> - afl.rs and cargo-fuzz</li>
+<li><a href="#s-icci">rust-icci</a></li>
+<li><a href="#s-fx">Firefox beta testing</a></li>
+<li><a href="#s-form">Formal verification</a></li>
+<li><a href="#s-smoke">smoke</a> - Cross-platform testing</li>
+<li><a href="#s-ru">rustup</a></li>
+<li><a href="#s-clippy">clippy</a></li>
+</ul></li>
+<li><a href="#s-f">Notes and future work</a></li>
+</ul>
+
+<p><a name="s-pr"></a></p>
+
+<h2 id="the-promise-of-rust">The promise of Rust</h2>
+
+<p>Rust is a systems programming language with massive ambitions. It is
+designed for creating the most reliable software, from the tiniest
+embedded systems to multi-million line behemoths, and its users need
+to have confidence that it is fit for purpose.</p>
+
+<p>Today Rust runs on <a href="https://forge.rust-lang.org/platform-support.html">many platforms</a>, and tomorrow it will run on many
+more. Rust will one day run on any machine with a microprocessor.</p>
+
+<p>And Rust moves fast, with <a href="https://github.com/rust-lang/rfcs/blob/master/text/0507-release-channels.md">releases every 6 weeks</a>, and a growing
+ecosystem of software depending on it. Rust makes <a href="https://blog.rust-lang.org/2014/10/30/Stability.html">strong guarantees</a>
+about compatibility and stability, what will, won&rsquo;t, and might break
+as the plattform evolves, and ensuring that we fulfill those
+guarantees is crucial to maintaining the trust of Rust&rsquo;s users.</p>
+
+<p>It&rsquo;s a big challenge to keep it all from falling apart. This is how we
+do it.</p>
+
+<p>We use strong <em>continuous integration</em> to catch many bugs before they
+are ever committed to the Rust repository, and <em>continuous releases</em>
+to enable more extensive testing of nightly and beta builds prior to
+the release every 6 weeks.</p>
+
+<p>During CI, all patches must pass the Rust test suite in all supported
+configurations before landing. Nightly and beta releases are subject
+to further testing using a number of techniques.</p>
+
+<p><a name="s-ci"></a></p>
+
+<h2 id="continuous-integration">Continuous integration</h2>
+
+<p>Rust relies on <a href="https://en.wikipedia.org/wiki/Continuous_integration">continuous integration</a>, where the code base is tested
+as part of the process of reviewing and merging patches.</p>
+
+<p>In Rust we do CI in a very particular way, and one which we are very
+proud of. Rust&rsquo;s creator, Graydon, originally described it in a blog
+post, <a href="http://graydon2.dreamwidth.org/1597.html">&ldquo;The Not Rocket Science Rule&rdquo;</a>. The thing we do
+differently from most is that we run the full test suite against every
+patch, as if it were merged to master, <em>before</em> committing it into the
+master branch, whereas most CI setups test <em>after</em> committing, or if
+they do run tests against every PR, they do so before merging, leaving
+open the possibility of regressions introduced during the merge.</p>
+
+<p>How does this work precisely? Our integration bot, <a href="https://github.com/bors">bors</a>, maintains a
+<a href="https://buildbot2.rust-lang.org/homu/queue/rust">queue of all pull requests</a> that have been reviewed and
+approved for landing. It proceeds through this queue, one at a time:
+for each pull request it merges the pull request branch with the
+master branch, but into a temporary branch (which we call &ldquo;auto&rdquo;);
+then it runs the entire test suite on that branch, in many
+configurations (as of 2017/07/10 there are 59 configurations built,
+and 20 tested). If all tests pass in all configurations only then does
+that commit become the master branch. Then bors moves onto the next
+PR.</p>
+
+<p>The important things to recognize about this arrangement are: first,
+the head commit on Rust&rsquo;s master branch is guaranteed to be fully
+tested at all times; but as a consequence, landing pull requests to
+Rust is completely serialized - only one PR can be under final testing
+at a time.</p>
+
+<p>The benefit of this arrangement is that Rust&rsquo;s developers have high
+confidence that the master branch works correctly, always. It isn&rsquo;t
+perfect - bugs do slip through - but it does provide significant peace
+of mind.</p>
+
+<p>There&rsquo;s a big downside though in that landing patches to Rust is
+serialized on running the test suite on every patch, and it takes a
+particularly long time to Run the Rust test suite in all the
+configurations we care about. Today the longest-running configuration
+takes over 2 hours. Rust always has a queue of approved patches
+waiting to land, and so it can take days for even simple patches to
+get through the queue.</p>
+
+<p>This can create an interesting competitive environment where authors
+desire high spots in the queue and complain when the queue grows.</p>
+
+<p>While PR authors are waiting in bors&rsquo;s queue, we also have a bot
+test their PR in a single configuration as a smoke test. This avoids
+the frustration of waiting for one&rsquo;s PR to work through the queue
+only to be rejected by a simple mistake.</p>
+
+<p>We do this style of CI not only on <a href="https://github.com/rust-lang/rust">rust-lang/rust</a> but also on other
+key projects, including <a href="https://github.com/rust-lang/cargo">cargo</a> and <a href="https://github.com/rust-lang/rustup.rs">rustup</a>.</p>
+
+<p>bors&rsquo;s implementation has gone through several iterations, and today
+it is implemented by a script called <a href="https://github.com/servo/homu">homu</a>, which is shared
+with Rust&rsquo;s sister project, <a href="http://github.com/servo">Servo</a>. It has also inspired other
+ther integration bots used in the Rust ecosystem and beyond,
+including <a href="https://github.com/bors-ng/bors-ng">bors-ng</a>.</p>
+
+<p>Test-first CI is the cornerstone of Rust stability.</p>
+
+<p>Today we do our CI on <a href="https://travis-ci.org/">Travis CI</a> for Linux and Mac OS, and <a href="https://www.appveyor.com/">AppVeyor</a>
+for Windows. Notably, all of our testing hosts are running x86, and
+so, for the non-x86 platforms that we do test, we currently use the
+<a href="https://en.wikipedia.org/wiki/QEMU">QEMU</a> emulator on Linux. Many non-x86 platforms do not yet get test
+coverage as part of the CI process (though see the <a href="#s-smoke">smoke</a>
+project). No non-x86 platforms are automatically tested on real
+hardware, a major limitation of the current setup.</p>
+
+<p><a name="s-cr"></a></p>
+
+<h2 id="continuous-releases">Continuous releases</h2>
+
+<p>Since we test so thoroughly, ideally all bugs are caught before
+entering the tree, but that is not the case. Once a patch enters the
+tree the clock is ticking until it hits the stable release.</p>
+
+<p>Rust publishes releases on three &ldquo;channels&rdquo;: nightly, beta, and stable.
+The nightly and beta channels provide an opportunity to catch bugs
+missed by the official CI before they hit a release.</p>
+
+<p>Rust has a 6 week beta cycle, so the minimum a patch will sit in tree
+before hitting a stable release is 6 weeks (if it lands on master
+right before the next beta), and the maximum is 12 weeks (if it lands
+at the beginning of a cycle).</p>
+
+<p>During the 6 week release cycle, regression triage meetings are held
+every 2 weeks to keep ahead of breakage and ensure the release stays
+on track. Again, the Rust release schedule is incredibly aggressive
+and it takes constant vigilence to maintain.</p>
+
+<p>To make releases as simple as possible we tie it directly to the CI
+system. Since we are already testing Rust in the same configurations
+that we ship releases for, it&rsquo;s a natural extension to simply produce
+release artifacts while we&rsquo;re testing. So we do that and publish
+them to their own S3 bucket.</p>
+
+<p>From those binaries we have a bot that periodically collects them into
+their final form for release and deploys them to static.rust-lang.org.</p>
+
+<p>So not only do we fully test every commit that lands on master, we
+also publish the complete release binaries at the same time.</p>
+
+<p>With as many release configurations as Rust has, differences between
+the continuous integration configuration and the release build
+configuration became a huge source of problems. Making testing and
+releasing the same thing eliminated them.</p>
+
+<p><a name="s-ts"></a></p>
+
+<h2 id="the-rust-test-suite">The Rust test suite</h2>
+
+<p>The Rust test suite covers rustc, std, cargo, rustdoc, and the Rust
+documentation, and features a number of special test harnesses to
+cover specific classes of bugs relevant to Rust.</p>
+
+<p>The tests are all ultimately run by <a href="https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/libtest">libtest</a>, the standard test
+crate, and many of them are coordinated by the <a href="https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/tools/compiletest">compiletest</a> tool.</p>
+
+<p>As of 2017/07/10 there are a little over 6k tests in the Rust test
+suite. This may seem surprisingly few, but keep in mind that Rust&rsquo;s
+strong static typing prevents many errors at compile-time, so Rust
+projects in general are believed to require fewer test cases than
+projects in other languages. All features and bug fixes are
+accompanied by test cases. Still, test coverage is currently unknown,
+and assumed to be far from complete.</p>
+
+<p><a name="s-ut"></a></p>
+
+<h3 id="unit-tests">Unit tests</h3>
+
+<p>Standard Rust unit tests, like any Rust author would write. These are
+tests annotated with <code>#[test]</code> and run with <code>cargo test</code>. This is the
+primary method for testing the standard library, and for cargo as
+well.</p>
+
+<p>This is the most basic kind of testing in Rust, but the compiler
+itself is mostly tested with more specialized tools.</p>
+
+<p><a name="s-ct"></a></p>
+
+<h3 id="compiletest">compiletest</h3>
+
+<p>compiletest is the main test harness of the Rust test suite, one of
+the oldest Rust codebases, and the oldest parallel Rust program. It
+implements a number of classes of test, each of which generally
+corresponds to a directory under <a href="https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/test"><code>src/test</code></a>. Most of these tests
+involve driving the compiler to compile one or more source programs,
+then interpreting the results.</p>
+
+<p>Most tests are represented by a Rust source file that may have
+annotations in comments directing compiletest in how to run the test,
+as in the following run-fail test, <code>test-panic.rs</code>, that tells
+compiletest that the string &ldquo;thread &lsquo;test_foo&rsquo; panicked at&rdquo; must be
+printed to stdout, to compile with the <code>--test</code> flag, and to ignore
+the test on emscripten.</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="c1">// check-stdout</span>
+<span class="c1">// error-pattern:thread &#39;test_foo&#39; panicked at</span>
+<span class="c1">// compile-flags: --test</span>
+<span class="c1">// ignore-emscripten</span>
+
+<span class="cp">#[test]</span>
+<span class="k">fn</span> <span class="n">test_foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">panic</span><span class="o">!</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>Most of the test types in the following sections are implemented
+by compiletest.</p>
+
+<p><a name="s-rpf"></a></p>
+
+<h3 id="run-pass-and-run-fail">run-pass and run-fail</h3>
+
+<p>Two of the oldest and simplest types of test. These test cases are
+Rust source code that should compile successfully. run-pass tests must
+run successfully; run-fail tests must run and return the Rust standard
+error code, 101.</p>
+
+<p><a name="s-cf"></a></p>
+
+<h3 id="compile-fail">compile-fail</h3>
+
+<p>compile-fail tests are some of the most common tests for testing
+language features. They must fail to compile, and stderr must
+emit errors containing specific text:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="m">1</span> <span class="o">=</span> <span class="m">2</span><span class="p">;</span> <span class="c1">//~ ERROR invalid left-hand side expression</span>
+    <span class="m">1</span> <span class="o">+=</span> <span class="m">2</span><span class="p">;</span> <span class="c1">//~ ERROR invalid left-hand side expression</span>
+    <span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">);</span> <span class="c1">//~ ERROR invalid left-hand side expression</span>
+
+    <span class="k">let</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">);</span>
+    <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">);</span> <span class="c1">//~ ERROR invalid left-hand side expression</span>
+
+    <span class="n">None</span> <span class="o">=</span> <span class="n">Some</span><span class="p">(</span><span class="m">3</span><span class="p">);</span> <span class="c1">//~ ERROR invalid left-hand side expression</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>While these are the bread and butter of rustc testing, their weakness
+is that they only validate some of the text output to stderr - they do
+not guarantee that the output actually looks good. For that reason new
+tests, or tests of tricky error output, are often written as &lsquo;ui&rsquo;
+tests.</p>
+
+<p><a name="s-ui"></a></p>
+
+<h3 id="ui">ui</h3>
+
+<p>UI tests are like compile-fail tests, but the output of stdout and
+stderr are checked fully. In these tests, instead of annotating the
+source with expected output, source files are accompanied by
+<code>*.stdout</code> and <code>*.stderr</code> templates that capture expactly what the
+compiler is allowed to output.</p>
+
+<p>So the test <code>issue-39544.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">enum</span> <span class="n">X</span> <span class="p">{</span>
+    <span class="n">Y</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">Z</span> <span class="p">{</span>
+    <span class="n">x</span><span class="o">:</span> <span class="n">X</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">z</span> <span class="o">=</span> <span class="n">Z</span> <span class="p">{</span> <span class="n">x</span><span class="o">:</span> <span class="n">X</span><span class="o">::</span><span class="n">Y</span> <span class="p">};</span>
+    <span class="k">let</span> <span class="n">_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">z</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>must have the output from <code>issue-39544.stderr</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="n">error</span><span class="o">:</span> <span class="n">cannot</span> <span class="n">borrow</span> <span class="n">immutable</span> <span class="n">field</span> <span class="err">`</span><span class="n">z</span><span class="p">.</span><span class="n">x</span><span class="err">`</span> <span class="k">as</span> <span class="n">mutable</span>
+  <span class="o">--&gt;</span> <span class="n">$DIR</span><span class="o">/</span><span class="n">issue</span><span class="o">-</span><span class="m">39544.</span><span class="n">rs</span><span class="o">:</span><span class="m">21</span><span class="o">:</span><span class="m">18</span>
+   <span class="o">|</span>
+<span class="m">21</span> <span class="o">|</span>     <span class="k">let</span> <span class="n">_</span> <span class="o">=</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">z</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+   <span class="o">|</span>                  <span class="o">^^^</span>
+
+<span class="n">error</span><span class="o">:</span> <span class="n">aborting</span> <span class="n">due</span> <span class="n">to</span> <span class="n">previous</span> <span class="n">error</span>
+</code></pre></div>
+
+<p>Because these templates are difficult to write by hand, there are
+scripts to help keep them updated when the output changes.</p>
+
+<p><a name="s-rm"></a></p>
+
+<h3 id="run-make">run-make</h3>
+
+<p>This is the kind of test you write when none of the other tests
+are sufficient. compiletest simply runs a Makefile, while setting
+up a bunch of environment variables that might be useful. Tests
+import <a href="https://github.com/rust-lang/rust/blob/37849a002ed91ac2b80aeb2172364b4e19250e05/src/test/run-make/tools.mk">tools.mk</a> to get access to various helpers.</p>
+
+<p>These tests are usually testing the behavior of rustc, like in this
+test that is validating something related to target specs:</p>
+<div class="highlight"><pre><code class="language-make" data-lang="make"><span class="cp">-include ../tools.mk</span>
+<span class="nf">all</span><span class="o">:</span>
+	<span class="k">$(</span>RUSTC<span class="k">)</span> foo.rs --target<span class="o">=</span>my-awesome-platform.json --crate-type<span class="o">=</span>lib --emit<span class="o">=</span>asm
+	grep -q -v morestack &lt; <span class="k">$(</span>TMPDIR<span class="k">)</span>/foo.s
+	<span class="k">$(</span>RUSTC<span class="k">)</span> foo.rs --target<span class="o">=</span>my-invalid-platform.json 2&gt;&amp;1 | grep -q <span class="s2">&quot;Error loading target specification&quot;</span>
+	<span class="k">$(</span>RUSTC<span class="k">)</span> foo.rs --target<span class="o">=</span>my-incomplete-platform.json 2&gt;&amp;1 | grep <span class="s1">&#39;Field llvm-target&#39;</span>
+	<span class="nv">RUST_TARGET_PATH</span><span class="o">=</span>. <span class="k">$(</span>RUSTC<span class="k">)</span> foo.rs --target<span class="o">=</span>my-awesome-platform --crate-type<span class="o">=</span>lib --emit<span class="o">=</span>asm
+	<span class="nv">RUST_TARGET_PATH</span><span class="o">=</span>. <span class="k">$(</span>RUSTC<span class="k">)</span> foo.rs --target<span class="o">=</span>x86_64-unknown-linux-gnu --crate-type<span class="o">=</span>lib --emit<span class="o">=</span>asm
+	<span class="k">$(</span>RUSTC<span class="k">)</span> -Z unstable-options --target<span class="o">=</span>my-awesome-platform.json --print target-spec-json &gt; <span class="k">$(</span>TMPDIR<span class="k">)</span>/test-platform.json <span class="o">&amp;&amp;</span> <span class="k">$(</span>RUSTC<span class="k">)</span> -Z unstable-options --target<span class="o">=</span><span class="k">$(</span>TMPDIR<span class="k">)</span>/test-platform.json --print target-spec-json | diff -q <span class="k">$(</span>TMPDIR<span class="k">)</span>/test-platform.json -
+</code></pre></div>
+
+<p><a name="s-cg"></a></p>
+
+<h3 id="codegen">codegen</h3>
+
+<p>codegen tests verify that rustc produces the expected LLVM IR for a given file.
+It is similar to tests used by LLVM to verify its own lowering to assembly.</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="c1">// compile-flags: -C no-prepopulate-passes</span>
+
+<span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">crate_type</span> <span class="o">=</span> <span class="s">&quot;lib&quot;</span><span class="p">]</span>
+
+<span class="k">pub</span> <span class="k">enum</span> <span class="n">E</span> <span class="p">{</span>
+    <span class="n">A</span><span class="p">,</span>
+    <span class="n">B</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1">// CHECK-LABEL: @exhaustive_match</span>
+<span class="cp">#[no_mangle]</span>
+<span class="k">pub</span> <span class="k">fn</span> <span class="n">exhaustive_match</span><span class="p">(</span><span class="n">e</span><span class="o">:</span> <span class="n">E</span><span class="p">)</span> <span class="p">{</span>
+<span class="c1">// CHECK: switch{{.*}}, label %[[DEFAULT:[a-zA-Z0-9_]+]]</span>
+<span class="c1">// CHECK: [[DEFAULT]]:</span>
+<span class="c1">// CHECK-NEXT: unreachable</span>
+    <span class="k">match</span> <span class="n">e</span> <span class="p">{</span>
+        <span class="n">E</span><span class="o">::</span><span class="n">A</span> <span class="o">=&gt;</span> <span class="p">(),</span>
+        <span class="n">E</span><span class="o">::</span><span class="n">B</span> <span class="o">=&gt;</span> <span class="p">(),</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><a name="s-cgu"></a></p>
+
+<h3 id="codegen-units">codegen-units</h3>
+
+<p>Like codegen tests these tests are validating the internal compiler
+behavior, in this case testing how items in Rust source are
+partitioned between &ldquo;codegen units&rdquo; at translation time. Correctly
+subdividing the work of translating Rust to LLVM and then machine code
+is required for incremental translation.</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="c1">// compile-flags:-Zprint-trans-items=eager</span>
+
+<span class="k">pub</span> <span class="k">static</span> <span class="n">FN</span> <span class="o">:</span> <span class="k">fn</span><span class="p">()</span> <span class="o">=</span> <span class="n">foo</span><span class="o">::&lt;</span><span class="k">i32</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="n">foo</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>
+
+<span class="c1">//~ TRANS_ITEM fn static_init::foo[0]&lt;i32&gt;</span>
+<span class="c1">//~ TRANS_ITEM static static_init::FN[0]</span>
+
+<span class="k">fn</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span> <span class="p">}</span>
+
+<span class="c1">//~ TRANS_ITEM fn static_init::main[0]</span>
+<span class="c1">//~ TRANS_ITEM drop-glue i8</span>
+</code></pre></div>
+
+<p><a name="s-p"></a></p>
+
+<h3 id="pretty">pretty</h3>
+
+<p>pretty tests are testing rustc&rsquo;s &ldquo;pretty printer&rdquo;, the code that
+converts the Rust AST back to Rust syntax. Rust uses the pretty
+printer for displaying error messages.</p>
+
+<p>pretty testing is done by asking the compiler to pretty-print source
+code, then asking it to pretty-print <em>that</em> source code, and testing
+that it reaches a steady state, where further pretty-printing produces
+the same source, and that it still works.</p>
+
+<p>Historically, rustc has run pretty testing over the entire codebase,
+but as the pretty-printer matured, pretty testing was reduced to a
+subset of the full tree.</p>
+
+<p><a name="s-dbg"></a></p>
+
+<h3 id="debuginfo">debuginfo</h3>
+
+<p>The problem of getting debuggers to understand the compiler&rsquo;s output
+is nearly as difficult as just getting the compiler to work in the
+first place. Debuggers are so complicated. These tests drive gdb and
+lldb to verify they work with the given Rust program.</p>
+
+<p>Here&rsquo;s a simple example from <code>cross-crate-spans.rs</code>:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">feature</span><span class="p">(</span><span class="n">omit_gdb_pretty_printer_section</span><span class="p">)]</span>
+<span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">omit_gdb_pretty_printer_section</span><span class="p">]</span>
+
+<span class="c1">// min-lldb-version: 310</span>
+
+<span class="c1">// aux-build:cross_crate_spans.rs</span>
+<span class="k">extern</span> <span class="n">crate</span> <span class="n">cross_crate_spans</span><span class="p">;</span>
+
+<span class="c1">// compile-flags:-g</span>
+
+
+<span class="c1">// === GDB TESTS ===================================================================================</span>
+
+<span class="c1">// gdb-command:break cross_crate_spans.rs:24</span>
+<span class="c1">// gdb-command:run</span>
+
+<span class="c1">// gdb-command:print result</span>
+<span class="c1">// gdbg-check:$1 = {__0 = 17, __1 = 17}</span>
+<span class="c1">// gdbr-check:$1 = (17, 17)</span>
+<span class="c1">// gdb-command:print a_variable</span>
+<span class="c1">// gdb-check:$2 = 123456789</span>
+<span class="c1">// gdb-command:print another_variable</span>
+<span class="c1">// gdb-check:$3 = 123456789.5</span>
+<span class="c1">// gdb-command:continue</span>
+
+<span class="c1">// gdb-command:print result</span>
+<span class="c1">// gdbg-check:$4 = {__0 = 1212, __1 = 1212}</span>
+<span class="c1">// gdbr-check:$4 = (1212, 1212)</span>
+<span class="c1">// gdb-command:print a_variable</span>
+<span class="c1">// gdb-check:$5 = 123456789</span>
+<span class="c1">// gdb-command:print another_variable</span>
+<span class="c1">// gdb-check:$6 = 123456789.5</span>
+<span class="c1">// gdb-command:continue</span>
+
+
+
+<span class="c1">// === LLDB TESTS ==================================================================================</span>
+
+<span class="c1">// lldb-command:b cross_crate_spans.rs:24</span>
+<span class="c1">// lldb-command:run</span>
+
+<span class="c1">// lldb-command:print result</span>
+<span class="c1">// lldb-check:[...]$0 = (17, 17)</span>
+<span class="c1">// lldb-command:print a_variable</span>
+<span class="c1">// lldb-check:[...]$1 = 123456789</span>
+<span class="c1">// lldb-command:print another_variable</span>
+<span class="c1">// lldb-check:[...]$2 = 123456789.5</span>
+<span class="c1">// lldb-command:continue</span>
+
+<span class="c1">// lldb-command:print result</span>
+<span class="c1">// lldb-check:[...]$3 = (1212, 1212)</span>
+<span class="c1">// lldb-command:print a_variable</span>
+<span class="c1">// lldb-check:[...]$4 = 123456789</span>
+<span class="c1">// lldb-command:print another_variable</span>
+<span class="c1">// lldb-check:[...]$5 = 123456789.5</span>
+<span class="c1">// lldb-command:continue</span>
+
+
+<span class="c1">// This test makes sure that we can break in functions inlined from other crates.</span>
+
+<span class="k">fn</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+
+    <span class="k">let</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cross_crate_spans</span><span class="o">::</span><span class="n">generic_function</span><span class="p">(</span><span class="m">17</span><span class="k">u32</span><span class="p">);</span>
+    <span class="k">let</span> <span class="n">_</span> <span class="o">=</span> <span class="n">cross_crate_spans</span><span class="o">::</span><span class="n">generic_function</span><span class="p">(</span><span class="m">1212</span><span class="k">i16</span><span class="p">);</span>
+
+<span class="p">}</span>
+</code></pre></div>
+
+<p><a name="s-inc"></a></p>
+
+<h3 id="incremental">incremental</h3>
+
+<p>Tests of incremental compilation, a technique rustc uses to track
+within a crate which source code needs to be recompiled when any other
+source code changes.</p>
+
+<p>In the example below, the test is run twice, first with <code>--cfg
+rpass1</code>, then again with <code>--cfg rpass2</code>. The test instructs the
+compiler to verify that the change in source code between the two
+invocations results in only mod <code>x</code> being recompiled. Other modules
+are reused.</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="c1">// A first &quot;spike&quot; for incremental compilation: here, we change the</span>
+<span class="c1">// content of the `make` function, and we find that we can reuse the</span>
+<span class="c1">// `y` module entirely (but not the `x` module).</span>
+
+<span class="c1">// revisions:rpass1 rpass2</span>
+
+<span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">feature</span><span class="p">(</span><span class="n">rustc_attrs</span><span class="p">)]</span>
+
+<span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">rustc_partition_reused</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="s">&quot;spike&quot;</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="s">&quot;rpass2&quot;</span><span class="p">)]</span>
+<span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">rustc_partition_translated</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="s">&quot;spike-x&quot;</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="s">&quot;rpass2&quot;</span><span class="p">)]</span>
+<span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">rustc_partition_reused</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="s">&quot;spike-y&quot;</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="s">&quot;rpass2&quot;</span><span class="p">)]</span>
+
+<span class="k">mod</span> <span class="n">x</span> <span class="p">{</span>
+    <span class="k">pub</span> <span class="k">struct</span> <span class="n">X</span> <span class="p">{</span>
+        <span class="n">x</span><span class="o">:</span> <span class="k">u32</span><span class="p">,</span> <span class="n">y</span><span class="o">:</span> <span class="k">u32</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="cp">#[cfg(rpass1)]</span>
+    <span class="k">fn</span> <span class="n">make</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">X</span> <span class="p">{</span>
+        <span class="n">X</span> <span class="p">{</span> <span class="n">x</span><span class="o">:</span> <span class="m">22</span><span class="p">,</span> <span class="n">y</span><span class="o">:</span> <span class="m">0</span> <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="cp">#[cfg(rpass2)]</span>
+    <span class="k">fn</span> <span class="n">make</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">X</span> <span class="p">{</span>
+        <span class="n">X</span> <span class="p">{</span> <span class="n">x</span><span class="o">:</span> <span class="m">11</span><span class="p">,</span> <span class="n">y</span><span class="o">:</span> <span class="m">11</span> <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">new</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">X</span> <span class="p">{</span>
+        <span class="n">make</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">:</span> <span class="o">&amp;</span><span class="n">X</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">u32</span> <span class="p">{</span>
+        <span class="n">x</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">x</span><span class="p">.</span><span class="n">y</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">mod</span> <span class="n">y</span> <span class="p">{</span>
+    <span class="k">use</span> <span class="n">x</span><span class="p">;</span>
+
+    <span class="k">pub</span> <span class="k">fn</span> <span class="n">assert_sum</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">bool</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">::</span><span class="n">new</span><span class="p">();</span>
+        <span class="n">x</span><span class="o">::</span><span class="n">sum</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="m">22</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">y</span><span class="o">::</span><span class="n">assert_sum</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><a name="s-mir"></a></p>
+
+<h3 id="mir-opt">mir-opt</h3>
+
+<p>Tests of optimizations on MIR, rustc&rsquo;s internal Rust
+representation. These tests check that the MIR looks as expected
+before and after given optimization passes.</p>
+
+<p>Note that as of 2017/07/10 MIR optimizations are not enabled by
+default.</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="k">false</span> <span class="p">{</span>
+        <span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;hello world!&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// END RUST SOURCE</span>
+<span class="c1">// START rustc.node4.SimplifyBranches-initial.before.mir</span>
+<span class="c1">// bb0: {</span>
+<span class="c1">//     switchInt(const false) -&gt; [0u8: bb2, otherwise: bb1];</span>
+<span class="c1">// }</span>
+<span class="c1">// END rustc.node4.SimplifyBranches-initial.before.mir</span>
+<span class="c1">// START rustc.node4.SimplifyBranches-initial.after.mir</span>
+<span class="c1">// bb0: {</span>
+<span class="c1">//     goto -&gt; bb2;</span>
+<span class="c1">// }</span>
+<span class="c1">// END rustc.node4.SimplifyBranches-initial.after.mir</span>
+</code></pre></div>
+
+<p><a name="s-rd"></a></p>
+
+<h3 id="rustdoc">rustdoc</h3>
+
+<p>This set of tests verifies that the HTML output of rustdoc includes
+various properties. Again, they are run by compiletest by interpreting
+comments in Rust source files. They look something like:</p>
+<div class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">crate_type</span><span class="o">=</span><span class="s">&quot;lib&quot;</span><span class="p">]</span>
+
+<span class="err">#</span><span class="o">!</span><span class="p">[</span><span class="n">feature</span><span class="p">(</span><span class="n">const_fn</span><span class="p">)]</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Foo</span><span class="p">;</span>
+
+<span class="k">impl</span> <span class="n">Foo</span> <span class="p">{</span>
+    <span class="c1">// @has const/struct.Foo.html &#39;//*[@id=&quot;new.v&quot;]//code&#39; &#39;const unsafe fn new&#39;</span>
+    <span class="k">pub</span> <span class="k">const</span> <span class="k">unsafe</span> <span class="k">fn</span> <span class="n">new</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Foo</span> <span class="p">{</span>
+        <span class="n">Foo</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><a name="s-doc"></a></p>
+
+<h3 id="documentation">documentation</h3>
+
+<p>Rust uses Markdown for both API documentation and standalone
+documentation. All examples in Rust documentation are tested by
+rustdoc, the documentation tool.</p>
+
+<p><a name="s-link"></a></p>
+
+<h3 id="linkchecker">linkchecker</h3>
+
+<p>The <a href="https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/tools/linkchecker">linkchecker</a> ensures that all internal HTML links produced by
+rustdoc for the standard library documentation are valid.</p>
+
+<p><a name="s-crt"></a></p>
+
+<h3 id="cargotest">cargotest</h3>
+
+<p><a href="https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/tools/cargotest">cargotest</a> is a small tool that runs the test suite of several
+significant out-of-tree Rust projects. The projects are chosen to have
+a wide variety of dependencies to maximize the chances of detecting
+type system regressions through build failures.</p>
+
+<p>This suite of tests was added in anger after cargo&rsquo;s own build broke
+too many times due to Rust regressions.</p>
+
+<p><a name="s-err"></a></p>
+
+<h3 id="check-error-index">check-error-index</h3>
+
+<p>rustc&rsquo;s error messages included extended help messages that often
+include examples. As with other documentation examples, these are
+tested.  A special tool is used to extract them from the compiler,
+convert them to markdown, and then run them through rustdoc.</p>
+
+<p><a name="s-dist"></a></p>
+
+<h3 id="distcheck">distcheck</h3>
+
+<p>Every release of Rust is accompanied by a tarball containing the
+source. This check verifies that that source tarball unpacks, builds
+and tests as expected.</p>
+
+<p><a name="s-tidy"></a></p>
+
+<h3 id="tidy">tidy</h3>
+
+<p>The <a href="https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/tools/tidy">tidy</a> tool runs a variety of sanity checks that the source tree
+conforms to various conventions:</p>
+
+<ul>
+<li><em>bins</em> - verifies that no binaries are checked in</li>
+<li><em>style</em> - verifies line length, no tabs, no trailing whitespace, no
+CR characters, no TODO or XXX directives, and that each file
+contains a license header</li>
+<li><em>errors</em> - verifies that rustc error codes are not duplicated</li>
+<li><em>cargo</em> - verifies that crates listed in <code>[dependencies]</code> are
+actually imported as <code>extern crate</code></li>
+<li><em>features</em> - verifies that various properties of Rust&rsquo;s &lsquo;feature&rsquo;
+definitions are correct</li>
+<li><em>pal</em> - verifies that platform-specific code only occurs in
+specific places</li>
+<li><em>unstable_book</em> - verifies that unstable features are represented
+in the documentation</li>
+<li><em>deps</em> - verifies the license of third-party crate dependencies</li>
+</ul>
+
+<p><a name="s-boot"></a></p>
+
+<h3 id="bootstrap">bootstrap</h3>
+
+<p>The Rust build system (called &ldquo;bootstrap&rdquo;) itself is written in Rust
+and has a self-check that runs before the build begins.</p>
+
+<p><a name="s-tools"></a></p>
+
+<h3 id="tools">tools</h3>
+
+<p>Rust is distributed with several externally-developed tools, today
+cargo and rls (the Rust Language Server). Their test suites are
+included as part of the Rust test suite.</p>
+
+<p><a name="s-ot"></a></p>
+
+<h2 id="other-testing">Other testing</h2>
+
+<p>All of the above sections describe the Rust test suite, which is Run
+prior to landing any patch. But that is neither the beginning nor the
+end of the Rust validation process. Below are yet more tools we use to
+test other aspects of the Rust platform. This includes tools and
+libraries Rust depends on, and the application of additional
+validation to releases during their nightly and beta phases, prior to
+their stable release.</p>
+
+<p><a name="s-ds"></a></p>
+
+<h3 id="cargobomb-and-crater">cargobomb and crater</h3>
+
+<p>In would be lovely if the Rust test suite caught all regressions.
+Sadly, the authors of the test suite haven&rsquo;t yet figured out how to
+anticipate every way in which Rust will be used in the wild.</p>
+
+<p>Fortunately though, Rust has a standard testing facility that most
+Rust crates use, and Rust has a standard repository of Rust crates in
+crates.io. GitHub further contains repositories of Rust crates that
+are not published to crates.io.</p>
+
+<p>These factors allow us to treat the entire world of open source Rust
+code as our test suite.</p>
+
+<p>As new nightlies and betas are published, we use the <a href="https://github.com/brson/cargobomb">cargobomb</a> tool
+to test this corpus of Rust code (as of 2017/07/10 over 13,000 crates)
+against both the stable release and a nightly or beta release,
+comparing the results for regressions.</p>
+
+<p>This type of testing helps us find subtle changes in the type system
+as crates fail to build on new releases, errors in code generation or
+library behavior that cause tests to fail or crash, and logic errors
+in the compiler that cause the compiler to crash.</p>
+
+<p><a href="http://cargobomb-reports.s3-website-us-west-1.amazonaws.com/nightly-2017-06-12/index.html">Here&rsquo;s an example of a cargobomb run against nightly</a>.
+Clicking the red &ldquo;regressed&rdquo; button reveals the most important
+category of results: those where the build against the second
+toolchain failed earlier than the first toolchain. Clicking through
+the results yields the full logs. In this run, 6972 of the 13055
+crates tested passed their test suites against both toolchains; 56
+crates regressed; and 3985 crates failed to even build (this can be
+for many reasons, but is often simply because the cargobomb
+environment is not set up appropriately for the crate).</p>
+
+<p>As of 2017/07/10, each run of cargobomb runs over 222,000 tests, twice
+over, across more than 13,000 projects.</p>
+
+<p>When cargbomb detects regressions, they are filed against
+rust-lang/rust, and the downstream crate authors alerted to the
+issue. Using the binary builds published for every successful PR, the
+PR that caused the regression is quickly identified by the
+<a href="https://github.com/Mark-Simulacrum/bisect-rust">bisect-rust</a> tool.</p>
+
+<p>As cargobomb-discovered regressions are fixed, naturally test cases
+capturing them are checked in to prevent those regressions occurring
+again in the future.</p>
+
+<p>cargobomb is the successor to a similar project called <a href="https://github.com/brson/taskcluster-crater">crater</a>, which
+only checks for successful typechecking, and does not run test suites.
+It is still in occasional use.</p>
+
+<p><a name="s-libc"></a></p>
+
+<h3 id="libc">libc</h3>
+
+<p>The <a href="https://github.com/rust-lang/libc">libc</a> crate has a special place in the ecosystem: it defines the
+FFI definitions of the C library and related systems libraries for
+every platform Rust supports, and ends up used in some form by most
+every Rust project. So it&rsquo;s important that it be correct.</p>
+
+<p>But writing correct FFI bindings is not a simple thing, since one does
+not have the benefit of the Rust type checker verifying the
+definitions. So the libc crate has a special testing regime designed
+to accomplish this verification.</p>
+
+<p>It uses the <a href="https://github.com/alexcrichton/ctest">ctest</a> crate to automatically compare the libc Rust
+bindings to the actual C definition.</p>
+
+<p>The basic process involves generating two programs, one in C, and one
+in Rust, that each produce metadata about function signatures,
+constant values, struct layout, alignment, and more. The Rust program
+calls into the C program and then compares that both sides produce the
+same metadata values.</p>
+
+<p><a name="s-cb"></a></p>
+
+<h3 id="compiler-builtins">compiler-builtins</h3>
+
+<p>This touches on a little known piece of black magic in comon compiler
+toolchains. One might expect that C compilers like gcc and clang
+compile your code directly to machine code, but in actuality, there
+are a number of constructs defined in the language which do not
+necessarily correspond neatly to machine instructions, depending on
+the architecture. As a consequence, nearly all C programs silently
+link to a tiny runtime library to provide implementations of very low
+level operations. In gcc this library is called <a href="https://gcc.gnu.org/onlinedocs/gccint/Libgcc.html">libgcc</a>, and in clang
+it is called <a href="https://github.com/rust-lang/compiler-rt">compiler-rt</a>, which began essentially by
+reverse-engineering libgcc.</p>
+
+<p>LLVM will silently lower LLVM IR to calls to functions provided by
+compiler-rt, so rustc, like clang, must ensure these functions are
+available.</p>
+
+<p>This library is implemented in a combination of assembly and C, and
+has over time grown to include a variety of runtime functionality
+expected by LLVM for sometimes niche features.</p>
+
+<p>Over the years we&rsquo;ve found it quite challenging to keep compiler-rt
+working on all platforms Rust (and LLVM) supports, so are in the
+gradual process of reimplementing it ourselves (in Rust), in a library
+called <a href="https://github.com/rust-lang-nursery/compiler-builtins">compiler-builtins</a>.</p>
+
+<p>The compiler-builtins crate is exclusively limited to basic math
+intrinsics, and does not include many of the advanced runtime features
+of compiler-rt, notably the sanitizer runtimes (which in Rust we would
+expect to be provided in a different crate).</p>
+
+<p>To verify this set of crucial low-level math functions behaves as
+expected the compiler-builtin crate has its own custom testing. For
+each function there is a test that generates a set of inputs to it,
+and passes it to both the upstream compiler-rt, and to our own
+compiler-builtins, and verifies their same output. The test suite
+additionally compares the symbols exported by each to ensure our
+implementation does not miss any functions.</p>
+
+<p><a name="s-perf"></a></p>
+
+<h3 id="perf-rust-lang-org">perf.rust-lang.org</h3>
+
+<p>It&rsquo;s a long-standing desire of the team to get a stronger handle on
+rustc&rsquo;s compile times, and to prevent them from increasing.
+<a href="http://perf.rust-lang.org/">perf.rust-lang.org</a> is a project that uses the CI builds of Rust to
+build a variety of representative Rust code bases and record how long
+it took, and how much memory was used. The compiler team then uses the
+reporting provided by the site to identify performance regressions.</p>
+
+<p><a name="s-fuzz"></a></p>
+
+<h3 id="fuzzing">fuzzing</h3>
+
+<p>There are two major fuzzers for Rust: <a href="https://github.com/rust-fuzz/afl.rs">afl.rs</a>, which uses the
+<a href="http://lcamtuf.coredump.cx/afl/">American Fuzzy Lop</a> fuzzer; and <a href="https://github.com/rust-fuzz/cargo-fuzz">cargo-fuzz</a>, which uses LLVM&rsquo;s
+<a href="http://llvm.org/docs/LibFuzzer.html">libfuzzer</a>. Both project collaborate under the <a href="https://github.com/rust-fuzz">Rust Fuzzing
+Authority</a> to improve the Rust crate ecosystem. They
+maintain a <a href="https://github.com/rust-fuzz/trophy-case">trophy case</a> of bugs discovered through their tools.
+Although an important part of the Rust toolset, fuzzing Rust tends to
+find fewer and less severe bugs than fuzzing software written in
+memory-unsafe languages.</p>
+
+<p><a name="s-icci"></a></p>
+
+<h3 id="rust-icci">rust-icci</h3>
+
+<p>The Rust compiler supports a technique called &ldquo;incremental
+compilation&rdquo;, a process by which the compiler tracks, on a very
+fine-grained level, dependencies between items in the code, to avoid
+re-typechecking and re-translating fetaures that have not changed
+since previous compilations. It can be thought of roughly as caching
+and reusing previously translated functions. The system is extremely
+complex and opportunities for errors are innumerable.</p>
+
+<p><a href="https://github.com/rust-icci">rust-icci</a> is a project that does brute-force validation of Rust
+incremental compilation by replaying the commit history of Rust
+projects with incremental compilation activitated, and without, and
+verifies that the results are the same.</p>
+
+<p><a name="s-fx"></a></p>
+
+<h3 id="firefox-beta-testing">Firefox beta testing</h3>
+
+<p>One of the major initial users of Rust is the Firefox web browser,
+which has integrated Rust into a number of subsystems of a large C++
+codebase that supports a variety of platforms across millions of
+client systems. This real-world exposure quickly began to expose
+regressions in Rust, and so Firefox is <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1337955">built and tested against Rust
+betas</a> as they are produced, providing important feedback during
+the Rust beta cycle.</p>
+
+<p><a name="s-form"></a></p>
+
+<h3 id="formal-verification">Formal verification</h3>
+
+<p>Ultimately we hope and expect Rust to be adopted by industries that
+traditionally require strong guarantees about reliability and
+correctness. These industries are conservative and slow to change, and
+tend to require large accumulations of evidence of correctness; and
+formal proofs provide some of the strongest such
+evidence. Furthermore, having formal models of the Rust system gives
+the Rust developers a framework to confidently apply advanced
+optimizations to Rust that are not yet possible.</p>
+
+<p>The most prominent project applying formal methods to validate Rust is
+the <a href="http://plv.mpi-sws.org/rustbelt/">Rust Belt</a> project, which aims to prove the Rust type system
+sound, and to develop a model for reasoning about unsafe code in Rust.
+It has thus far <a href="https://people.mpi-sws.org/~dreyer/papers/rustbelt/paper.pdf">proven the soundness</a> of the most common
+abstractions in the standard library, discovering <a href="https://www.ralfj.de/blog/2017/06/09/mutexguard-sync.html">one soundness
+bug</a> in the process.</p>
+
+<p>Previously, Eric Reed formalized a safe subset of Rust called
+<a href="https://www.cs.washington.edu/tr/2015/03/UW-CSE-15-03-02.pdf">Patina</a>, and the <a href="http://ieeexplore.ieee.org/document/7371997/">CRUST</a> project used bounded model checking to find
+memory safety violation.</p>
+
+<p><a name="s-smoke"></a></p>
+
+<h3 id="smoke">smoke</h3>
+
+<p>Many of the platforms that Rust supports, though they may be <em>built</em>
+by Rust&rsquo;s CI, are not <em>tested</em> by Rust&rsquo;s CI, either because of lack of
+capacity, or because it would take too long (often due to emulation).</p>
+
+<p>The <a href="https://github.com/japaric/smoke">smoke</a> project is an independent CI project to run tests against
+some of these platforms using emulators.</p>
+
+<p>Note that as of 2017/07/10 the smoke project is bitrotted and needs to
+be refreshed.</p>
+
+<p><a name="s-ru"></a></p>
+
+<h3 id="rustup">rustup</h3>
+
+<p>Though not strictly a part of the Rust distribution, <a href="https://github.com/rust-lang/rustup.rs">rustup</a> is a
+critical piece of the Rust distribution infrastructure. It is the tool
+that installs Rust for most Rust users. While limited in scope, in
+performs important network and and file I/O that must be reliable
+across all supported platforms. rustup is self-updating, and a
+self-update failure would cause major disruption for Rust users.</p>
+
+<p>rustup&rsquo;s primary functionality works by downloading a release
+&ldquo;manifest&rdquo; from the official Rust servers, and interpreting it
+to install the requested Rust releases.</p>
+
+<p>While its test scaffolding includes a mock distribution server, it
+notably it does not contain actual network tests. In general, rustup&rsquo;s
+testing could be much more thorough.</p>
+
+<p><a name="s-clippy"></a></p>
+
+<h3 id="clippy">clippy</h3>
+
+<p><a href="https://github.com/Manishearth/rust-clippy">clippy</a> provides additional static analysis (called &ldquo;lints&rdquo;) beyond
+what is done by the compiler. While not distributed by the compiler,
+and rarely run on the Rust codebase itself, it is widely used by the
+Rust community to provide an extra level of consistency and polish, so
+seems worth mentioning.</p>
+
+<p><a name="s-f"></a></p>
+
+<h2 id="notes-and-future-work">Notes and future work</h2>
+
+<p>So Rust receives a lot of testing, but there&rsquo;s more that can be
+done. Here we&rsquo;ll say a little bit about other possibilities. Almost
+everything here would be an awesome project for an ambitious
+contributor to undertake!</p>
+
+<p>An obvious omission is the lack of any testing with tools like
+<a href="http://valgrind.org/">valgrind</a> and <a href="https://github.com/google/sanitizers">address sanitizer</a>. These tools are incredibly
+effective at finding incorrect memory accesses by instrumenting
+programs at runtime, so with Rust&rsquo;s focus on memory safety one might
+expect them to be employed extensively. They are not though.</p>
+
+<p>Valgrind was a crucial tool in Rust&rsquo;s original development, back when
+Rust barely worked. There were several years where the entire test
+suite was required to be valgrind-clean, and it&rsquo;s hard to imagine
+bringing up Rust without it. At some point though <a href="https://github.com/rust-lang/rust/issues/11710">LLVM began doing a
+valid optimization</a> that valgrind was unable to recognize as valid, and
+that made its application useless for us, or at least too difficult to
+maintain. By that point Rust was mature and memory safe, so valgrind
+testing was disabled, and eventually it bitrotted and was removed from
+the tree.</p>
+
+<p>Unlike valgrind, address sanitizer requires the help of the compiler
+to instrument binaries, and that support landed in LLVM long after
+Rust had matured.</p>
+
+<p>Today rustc&rsquo;s code generation and the abstractions in the standard
+library are mature and well-trusted, and it&rsquo;s rare for either of them
+to create the kind of errors these tools detect, so nobody feels it a
+pressing matter to reenable this kind of testing.</p>
+
+<p>We do not measure test coverage of the Rust compiler, and have no
+conception of how well it is covered. Integration of coverage
+reporting into Rust CI is an obvious and easy improvement.</p>
+
+<p>The Rust source tree contains a poorly-maintained definition of the
+Rust language <a href="https://github.com/rust-lang/rust/tree/37849a002ed91ac2b80aeb2172364b4e19250e05/src/grammar">grammar</a>, along with the facilities for testing that
+grammar against the compiler&rsquo;s production parser. These tests have
+never been activated as part of Rust&rsquo;s CI though and as a result the
+grammar is neither complete nor authoritative.</p>
+
+<p>The Rust installers, of which there are several different types, are
+not automatically tested, and there is a notable lack of human-driven
+QA during the Rust release process. It would be greatly desirable to
+automate the deployment and installation of Rust in a variety of
+scenarios via a test environment prior to release.</p>
+
+<p>In the future we expect to develop a formal definition of Rust&rsquo;s
+memory model, which will define what is and isn&rsquo;t allowed to be done
+in unsafe blocks, and also what the compiler is allowed to do during
+optimization. The memory model will be defined in such a way that Rust
+code can be instrumented to validate conformance, and we will run
+conformance tests across the entire ecosystem with the cargobomb tool.</p>
+
+<p>The Rust standard library is intended to provide a superset of the
+core library API, but there is no validation that this is true, and
+already there are known places where the two crates diverge in their
+APIs. There should be a tool that verifies the superset relationship.</p>
+
+<p>Rust would probably benefit from &ldquo;chaos engineering&rdquo;, that is,
+injecting faults into the runtime and confirming that the system
+behaves as expected. Panic and error paths are little exercised and
+tend to hide bugs, especially around the interaction between <code>unsafe</code>
+and unwinding. Of course the standard library is small and
+well-reviewed, so the returns of such an effort may be small there,
+but it would almost certainly be fruitful to apply the appoach more
+broadly in the crate ecosystem.</p>
+
+<p>Rust crates use an interpretation of the semver versioning standard.
+Among other things it defines what API changes are allowed between
+releases of crates. We expect in the future to provide a tool that
+crate authors can use to validate that the API changes in their
+releases correspond to semver.</p>
+
+<p>We also expect to provide other tools to help the crate ecosystem
+manage their evolution. <a href="https://github.com/brson/cargo-crusader">cargo-crusader</a> is one such tool, though it
+is not fully-realized. It runs the test suites of a crate&rsquo;s reverse
+dependencies (that is, the crates that depend on your crate) prior to
+publishing a new version.</p>
+
+<p>We have no tracking of metrics around regression rates from release to
+release, despite being vigilant about testing downstream crates. We
+should expect in the future to be able to provide firm numbers on
+known regressions per release.</p>
+
+<p>The cargobomb technique of testing all known Rust code in the
+ecosystem is powerful, but currently limited to running crates&rsquo; test
+suites to detect Rust language regressions. There are other types of
+analyses we would like to do in this fashion.</p>
+
+<p>The security of the Rust release process is crucial, and lacking.  The
+possibility of the compiler being backdoored, or even the subject of a
+&ldquo;<a href="https://www.ece.cmu.edu/~ganger/712.fall02/papers/p761-thompson.pdf">trusting trust</a>&rdquo; attack, is real. In the future we expect to have
+reproducible builds, and reproducible releases, meaning that
+third-parties can produce the exact same binary releases the Rust
+project does.  With that capability we would be able to produce a
+simple tool that would let others validate that any individual release
+has not been compromised with code that does not originate from the
+source tree; and ultimately, to validate that the entire bootstrap
+chain has not been compromised by a self-replicating, &ldquo;trusting trust&rdquo;
+-style backdoor.</p>
+
+<p>Along those same lines, <em>someday</em> we would expect to have multiple
+implementations of Rust to validate against the reference compiler,
+and to provide further assurance against &ldquo;trusting trust&rdquo; via <a href="https://www.dwheeler.com/trusting-trust/">diverse
+double compilation</a>.</p>
+
+<p>rustup should do mock testing using a self-contained http server,
+whereas today its mock server is just using a filesystem mimicking the
+layout of static.rust-lang.org.</p>
+
+<p>rustup should have a set of self-upgrade tests, run against the live
+rustup release archives, and run prior to releases, that ensure that
+it can self-upgrade from the original release up to the present
+release.</p>
+
+<!-- links -->
+
+
+      <div class="share">
+<a class="twitter-share-button"
+   href="https://twitter.com/intent/tweet?text=How Software is Tested: Rust &via=systemundertest&url=https%3a%2f%2fsystemundertest.org%2frust%2f&hashtags=systemundertest&data-size=default" target='_blank'>Tweet</a>
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+
+
+
+    </article>
+
+    <h3 class="relevant-articles-header">More articles</h3>
+<div class="relevant-articles">
+
+
+  
+    
+  
+
+  
+    
+        <div class="relevant-article-summary">
+
+    <div class="meta">
+    <h2><a href="https://systemundertest.org/interview/wine/">Wine </a></h2>
+
+      Sep 23, 2014 &nbsp;
+      
+        #<a href="/categories/interview">Interview</a>&nbsp;
+      
+
+      
+       
+      by @<a href="https://twitter.com/estet" target="_blank">ligurio</a>&nbsp;
+      
+      
+    </div>
+
+  </div>
+
+
+    
+  
+
+  
+    
+        <div class="relevant-article-summary">
+
+    <div class="meta">
+    <h2><a href="https://systemundertest.org/llvm/">LLVM </a></h2>
+
+      Mar 24, 2016 &nbsp;
+      
+        #<a href="/categories/compilers">Compilers</a>&nbsp;
+      
+
+      
+       
+      by @<a href="https://twitter.com/1101_debian" target="_blank">AlexDenisov</a>&nbsp;
+      
+      
+    </div>
+
+  </div>
+
+
+    
+  
+
+  
+    
+        <div class="relevant-article-summary">
+
+    <div class="meta">
+    <h2><a href="https://systemundertest.org/freebsd/">FreeBSD </a></h2>
+
+      Mar 31, 2016 &nbsp;
+      
+        #<a href="/categories/operating-systems">Operating Systems</a>&nbsp;
+      
+
+      
+       
+      by @<a href="https://twitter.com/1101_debian" target="_blank">AlexDenisov</a>&nbsp;
+      
+      
+    </div>
+
+  </div>
+
+
+    
+  
+
+  
+    
+        <div class="relevant-article-summary">
+
+    <div class="meta">
+    <h2><a href="https://systemundertest.org/gnu-make/">GNU Make </a></h2>
+
+      Jun 12, 2016 &nbsp;
+      
+        #<a href="/categories/build-tools">Build Tools</a>&nbsp;
+      
+
+      
+       
+      by @<a href="https://twitter.com/sbpankevich" target="_blank">StanislavPankevich</a>&nbsp;
+      
+      
+    </div>
+
+  </div>
+
+
+    
+  
+
+  
+    
+        <div class="relevant-article-summary">
+
+    <div class="meta">
+    <h2><a href="https://systemundertest.org/xterm/">XTerm </a></h2>
+
+      Jul 28, 2016 &nbsp;
+      
+        #<a href="/categories/command-line-tools">Command Line Tools</a>&nbsp;
+      
+
+      
+       
+      by @<a href="https://twitter.com/sbpankevich" target="_blank">StanislavPankevich</a>&nbsp;
+      
+      
+    </div>
+
+  </div>
+
+
+    
+  
+
+  
+
+  
+    
+  
+
+</div>
+
+
+
+
+    
+ <aside><div id="disqus_thread"></div></aside>
+
+<script type="text/javascript">
+
+     
+    var disqus_shortname = 'systemundertest';
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+
+  </main>
+
+
+  
+  <footer role="contentinfo">
+    <div style="text-align:center;">
+      
+      Brought to you by curious developers
+      <br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+    </div>
+  </footer>
+
+
+</div>
+
+<script src="/js/spoiler.js"></script>
+
+
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-80371307-1', 'auto');
+	ga('send', 'pageview');
+</script>
+
+</body>
+</html>
+
+

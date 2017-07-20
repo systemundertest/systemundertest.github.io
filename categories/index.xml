@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on System Under Test</title>
+    <link>https://systemundertest.org/categories/</link>
+    <description>Recent content in Categories on System Under Test</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Brought to you by curious developers</copyright>
+    <lastBuildDate>Sun, 12 Jun 2016 21:05:00 +0200</lastBuildDate>
+    <atom:link href="/categories/" rel="self" type="application/rss+xml" />
+    
+  </channel>
+</rss>
